@@ -27,6 +27,86 @@
 - **보조 도구**: 저장된 데이터를 콘솔에서 실시간으로 확인하는 모니터링 도구, 테스트용 더미 데이터를
   생성해 실제 데이터 파일에 주입하는 도구를 함께 제공한다.
 
+## 빌드 방법
+
+Visual Studio(MSBuild) 기반 C++20 콘솔 프로젝트다. 외부 의존성이 없으므로 클론 후 별도
+패키지 설치 없이 바로 빌드할 수 있다.
+
+```bash
+# 로컬에 PlatformToolset v145가 없는 환경(v143만 있는 경우) 예시
+MSBuild.exe SampleOrderSystem-Chan-0613.slnx /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v143
+```
+
+솔루션(`SampleOrderSystem-Chan-0613.slnx`)에는 3개 프로젝트가 등록되어 있으며 위 명령 한 번으로
+모두 빌드된다.
+
+| 프로젝트 | 결과물 | 역할 |
+|---|---|---|
+| `SampleOrderSystem-Chan-0613` | `SampleOrderSystem-Chan-0613.exe` | 메인 애플리케이션 |
+| `tools/DataMonitor` | `DataMonitor.exe` | 읽기 전용 실시간 모니터링 대시보드 (보조 도구) |
+| `tools/DummyDataGenerator` | `DummyDataGenerator.exe` | 테스트용 더미 시료/주문 데이터 생성 (보조 도구) |
+
+로컬에 PlatformToolset v145가 설치되어 있다면 `/p:PlatformToolset=v143` 옵션 없이 그대로
+Visual Studio에서 솔루션을 열어 빌드해도 된다.
+
+## 실행 방법
+
+### 메인 애플리케이션
+
+```bash
+SampleOrderSystem-Chan-0613.exe
+```
+
+실행하면 메뉴 번호(1~6, 종료는 0)를 입력해 시료 관리 → 시료 주문 → 주문 승인/거절 → 모니터링 →
+생산 라인 조회 → 출고 처리를 순서대로 진행할 수 있다. 데이터는 실행 파일 기준
+`data/samples.json`, `data/orders.json`, `data/production_queue.json`에 write-through로 즉시
+저장되며, 앱을 재시작해도 유지된다.
+
+테스트 스위트만 실행하려면 인자로 `--test`를 전달한다.
+
+```bash
+SampleOrderSystem-Chan-0613.exe --test
+```
+
+Unit Test + 적대적 테스트 전체를 실행하고, 실패 건수를 종료 코드로 반환한다(0 = 전부 통과).
+
+### 보조 도구 2종
+
+`tools/DataMonitor`, `tools/DummyDataGenerator`는 메인 앱과 **같은 `data/` 폴더**를 상대
+경로(`../../data/...`)로 가리키도록 구성되어 있으므로, 메인 앱을 실행한 적이 있는 동일한
+작업 디렉터리 구조에서 실행해야 같은 데이터를 공유한다.
+
+```bash
+DataMonitor.exe               # 읽기 전용 실시간 대시보드. Q 또는 Esc로 종료
+DummyDataGenerator.exe 4 6    # 예: 시료 4개 + 주문 6개 더미 데이터 생성
+```
+
+`DataMonitor.exe`는 메인 앱과 동시에 실행해도 안전하다(읽기 전용, 쓰기 없음) — 실제로 이
+동시 실행 시나리오는 Phase 5에서 수동으로 검증했다([docs/PLAN.md](docs/PLAN.md) Phase 5
+섹션 참고).
+
+## 폴더 구조 요약
+
+```
+SampleOrderSystem-Chan-0613/
+├── CLAUDE.md, README.md                 # 설계 결정 / 개요 문서 (저장소 루트)
+├── docs/                                # PRD, Phase별 계획, Clean Code 검토, 커밋 이력
+├── SampleOrderSystem-Chan-0613.slnx     # 솔루션 (메인 앱 + 보조 도구 2종)
+└── SampleOrderSystem-Chan-0613/         # 메인 애플리케이션 프로젝트
+    ├── Model/                           # 도메인 모델 + Repository 인터페이스/구현체
+    ├── Controller/                      # 비즈니스 로직 (Sample/Order/Monitoring)
+    ├── View/                            # 콘솔 입출력 전용
+    ├── Json/                            # 자체 구현 JSON 라이브러리 (JsonLib)
+    ├── data/                            # 런타임 생성 JSON 데이터 (Git에는 폴더만 유지)
+    ├── tools/
+    │   ├── DataMonitor/                 # 별도 실행 파일 — 읽기 전용 모니터링
+    │   └── DummyDataGenerator/          # 별도 실행 파일 — 더미 데이터 시딩
+    ├── tests/
+    │   ├── unit/                        # Model 계산·상태 전이·Repository 왕복 등
+    │   └── adversarial/                 # 경계값/위반 시나리오/손상 데이터 등
+    └── main.cpp                         # Repository 구현체 조립(DI) + 메뉴 루프
+```
+
 ## 문서 구성
 
 이 저장소는 "무엇을 만들지"와 "어떻게 만들지", "어떤 순서로 만들지"를 각각 다른 문서로 분리한다.
@@ -35,7 +115,9 @@
 |---|---|
 | [docs/PRD.md](docs/PRD.md) | **무엇을**: PDF 기능 명세를 요구사항 문서 형태로 재정리. 설계 결정은 다루지 않는다. |
 | [CLAUDE.md](CLAUDE.md) | **어떻게**: 위 요구사항을 구현할 때 반드시 지켜야 할 설계 결정·알고리즘(재고 반영 시점, 생산 완료 판정 등). 명세가 모호한 부분을 어떻게 해석해 확정했는지도 여기 있다. |
-| [docs/PLAN.md](docs/PLAN.md) | **어떤 순서로**: Phase별 구현 계획과 체크리스트. |
+| [docs/PLAN.md](docs/PLAN.md) | **어떤 순서로**: Phase별 구현 계획과 체크리스트, 각 Phase의 빌드/수동 검증 결과. |
+| [docs/CLEAN_CODE_REVIEW.md](docs/CLEAN_CODE_REVIEW.md) | **왜 이 구조로 남겼는가**: Phase 7에서 진행한 OOP/SOLID 관점 트레이드오프 검토와 각 결정의 근거. |
+| [docs/COMMIT_HISTORY.md](docs/COMMIT_HISTORY.md) | 전체 커밋 이력을 해시/제목/반영 내용 표로 정리. |
 
 셋 다 서로를 링크하며 내용을 중복해서 옮겨 적지 않는다 — "이게 원래 요구사항인지, 우리가
 그렇게 정하기로 한 결정인지" 헷갈릴 때는 PRD.md(요구사항)와 CLAUDE.md(해석/결정)를 구분해서
