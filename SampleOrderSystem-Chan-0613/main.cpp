@@ -3,6 +3,7 @@
 #include <Windows.h>
 
 #include <chrono>
+#include <filesystem>
 #include <iostream>
 #include <limits>
 #include <string>
@@ -28,6 +29,7 @@ namespace
 {
     // 실행 파일의 작업 디렉터리를 기준으로 한 상대 경로 — Visual Studio 디버거는 기본적으로
     // 프로젝트 폴더를 작업 디렉터리로 사용하므로, 이 폴더의 data/ 하위에 그대로 생성/갱신된다.
+    constexpr const char* kDataDirectory = "data";
     constexpr const char* kSamplesFilePath = "data/samples.json";
     constexpr const char* kOrdersFilePath = "data/orders.json";
     constexpr const char* kProductionQueueFilePath = "data/production_queue.json";
@@ -193,6 +195,14 @@ namespace
 
     int RunApplication()
     {
+        // Repository들이 data/*.json에 write-through로 저장을 시도하기 전에 폴더 자체가
+        // 반드시 존재해야 한다 — JsonDocument::saveToFile은 상위 폴더가 없으면 실패를
+        // false로만 반환하고 예외를 던지지 않으므로, 이 폴더가 없는 채로 실행하면(예: 빌드
+        // 출력 폴더처럼 data/.gitkeep이 딸려오지 않는 위치) 등록/승인이 화면에는 성공한
+        // 것처럼 보이지만 실제로는 아무것도 저장되지 않고, 재시작 시 초기화된 것처럼
+        // 보이는 문제가 생긴다.
+        std::filesystem::create_directories(kDataDirectory);
+
         Model::JsonSampleRepository sampleRepository(kSamplesFilePath);
         Model::JsonOrderRepository orderRepository(kOrdersFilePath);
         Model::JsonProductionLineRepository productionLineRepository(kProductionQueueFilePath);

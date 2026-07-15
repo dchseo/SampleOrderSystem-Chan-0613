@@ -1,7 +1,8 @@
 // DataMonitor — 데이터 모니터링 콘솔 도구 (DataMonitor-Chan-0613 PoC 이식).
 //
-// SampleOrderSystem 본 애플리케이션이 쓰는 ../../data/samples.json, orders.json,
-// production_queue.json을 JsonSampleRepository/JsonOrderRepository/
+// SampleOrderSystem 본 애플리케이션이 쓰는 data/samples.json, orders.json,
+// production_queue.json(솔루션 빌드 시 본 애플리케이션과 같은 출력 폴더에 위치하므로 상대
+// 경로가 동일하다)을 JsonSampleRepository/JsonOrderRepository/
 // JsonProductionLineRepository(변경 없이 소비)로 읽어 MonitoringController로 집계한 뒤,
 // 콘솔 화면에 일정 주기로 다시 그린다.
 //
@@ -33,9 +34,15 @@
 
 namespace
 {
-    constexpr const char* kSamplesFilePath = "../../data/samples.json";
-    constexpr const char* kOrdersFilePath = "../../data/orders.json";
-    constexpr const char* kProductionQueueFilePath = "../../data/production_queue.json";
+    // 메인 앱(SampleOrderSystem-Chan-0613.exe)과 동일한 상대 경로를 쓴다 — MSBuild
+    // 기본 설정상 솔루션 내 모든 프로젝트(.vcxproj)는 OutDir을 따로 지정하지 않는 한
+    // $(SolutionDir)$(Platform)\$(Configuration)\에 함께 빌드되므로, 실행 파일들은
+    // 실제로 같은 폴더에 나란히 위치한다. 예전에는 "../../data/..."(도구가 자신의
+    // 프로젝트 폴더 하위에 별도로 빌드된다는 잘못된 가정)를 썼는데, 실제로는 메인 앱과
+    // 같은 폴더에서 실행되므로 메인 앱이 쓰는 data/ 와 다른 폴더를 가리키는 버그가 있었다.
+    constexpr const char* kSamplesFilePath = "data/samples.json";
+    constexpr const char* kOrdersFilePath = "data/orders.json";
+    constexpr const char* kProductionQueueFilePath = "data/production_queue.json";
     constexpr int kDefaultRefreshIntervalSeconds = 2;
 
     void EnableAnsiEscapes()

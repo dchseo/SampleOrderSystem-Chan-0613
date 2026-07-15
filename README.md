@@ -72,9 +72,9 @@ Unit Test + 적대적 테스트 전체를 실행하고, 실패 건수를 종료 
 
 ### 보조 도구 2종
 
-`tools/DataMonitor`, `tools/DummyDataGenerator`는 메인 앱과 **같은 `data/` 폴더**를 상대
-경로(`../../data/...`)로 가리키도록 구성되어 있으므로, 메인 앱을 실행한 적이 있는 동일한
-작업 디렉터리 구조에서 실행해야 같은 데이터를 공유한다.
+`tools/DataMonitor`, `tools/DummyDataGenerator`는 메인 앱과 **동일한 상대 경로**(`data/...`)로
+데이터 파일을 가리킨다 — 솔루션(`.slnx`)을 통해 빌드하면 세 실행 파일이 모두 같은 출력 폴더
+(`x64/Debug/`)에 나란히 생성되므로, 같은 폴더에서 실행하는 한 자동으로 같은 `data/`를 공유한다.
 
 ```bash
 DataMonitor.exe               # 읽기 전용 실시간 대시보드. Q 또는 Esc로 종료

@@ -1,7 +1,8 @@
 // DummyDataGenerator — Dummy 데이터 생성 Tool (DummyDataGenerator-Chan-0613 PoC 이식).
 //
-// SampleOrderSystem 본 애플리케이션과 동일한 data/ 폴더(../../data/samples.json,
-// ../../data/orders.json)에 JsonSampleRepository/JsonOrderRepository의 Add(...)를 통해
+// SampleOrderSystem 본 애플리케이션과 동일한 data/ 폴더(data/samples.json,
+// data/orders.json — 솔루션 빌드 시 본 애플리케이션과 같은 출력 폴더에 위치하므로 상대
+// 경로가 동일하다)에 JsonSampleRepository/JsonOrderRepository의 Add(...)를 통해
 // 더미 시료/주문 데이터를 실제로 추가한다. 본 애플리케이션이 쓰는 파일을 그대로 공유하므로,
 // 별도 실행 파일로 빌드해 필요할 때만 실행한다 (평소 실행되는 도구가 아님).
 //
@@ -22,6 +23,7 @@
 #include "Model/Repository/ISampleRepository.h"
 #include "Model/Sample.h"
 
+#include <filesystem>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -34,8 +36,13 @@ using namespace Model;
 
 namespace
 {
-    constexpr const char* kSamplesFilePath = "../../data/samples.json";
-    constexpr const char* kOrdersFilePath = "../../data/orders.json";
+    // 메인 앱과 동일한 상대 경로를 쓴다 — MSBuild 기본 설정상 솔루션 내 모든 프로젝트는
+    // OutDir을 따로 지정하지 않는 한 $(SolutionDir)$(Platform)\$(Configuration)\에 함께
+    // 빌드되어 메인 앱과 같은 폴더에서 실행되므로, "../../data/..."(도구가 자신의 프로젝트
+    // 폴더 하위에 별도로 빌드된다는 잘못된 가정)는 메인 앱이 쓰는 data/ 와 다른 폴더를
+    // 가리키는 버그였다.
+    constexpr const char* kSamplesFilePath = "data/samples.json";
+    constexpr const char* kOrdersFilePath = "data/orders.json";
     constexpr int kDefaultSampleCount = 5;
     constexpr int kDefaultOrderCount = 10;
 
@@ -94,6 +101,10 @@ int main(int argc, char** argv)
     std::cout << "DummyDataGenerator — Dummy 데이터 생성 Tool\n";
     std::cout << "시료 " << sampleCount << "건, 주문 " << orderCount << "건을 생성하여 "
                << kSamplesFilePath << ", " << kOrdersFilePath << "에 추가합니다.\n\n";
+
+    // 메인 앱과 동일한 이유로, 쓰기 전에 data/ 폴더 자체가 존재해야 한다 (JsonDocument::
+    // saveToFile은 상위 폴더가 없으면 예외 없이 false만 반환하고 조용히 실패한다).
+    std::filesystem::create_directories("data");
 
     JsonSampleRepository sampleRepository(kSamplesFilePath);
     JsonOrderRepository orderRepository(kOrdersFilePath);
