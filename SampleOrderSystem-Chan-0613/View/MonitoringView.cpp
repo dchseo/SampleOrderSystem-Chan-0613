@@ -1,6 +1,7 @@
 #include "MonitoringView.h"
 #include <iomanip>
 #include <iostream>
+#include "ConsoleFormat.h"
 
 namespace View
 {
@@ -23,10 +24,9 @@ namespace View
     void MonitoringView::ShowInventoryStatus(const std::vector<Model::InventoryStatusItem>& items) const
     {
         std::cout << "\n시료별 재고 현황\n";
-        std::cout << std::left
-            << std::setw(20) << "시료명"
-            << std::setw(10) << "재고"
-            << std::setw(8) << "상태" << '\n';
+        std::cout << PadRight("시료명", 18)
+            << PadRight("재고", 8)
+            << "상태" << '\n';
 
         for (const auto& item : items)
         {
@@ -37,10 +37,9 @@ namespace View
             case Model::InventoryLevel::Low: levelText = "부족"; break;
             case Model::InventoryLevel::Depleted: levelText = "고갈"; break;
             }
-            std::cout << std::left
-                << std::setw(20) << item.sample.GetName()
-                << std::setw(10) << item.sample.GetStock()
-                << std::setw(8) << levelText << '\n';
+            std::cout << PadRight(item.sample.GetName(), 18)
+                << PadRight(std::to_string(item.sample.GetStock()), 8)
+                << levelText << '\n';
         }
     }
 }

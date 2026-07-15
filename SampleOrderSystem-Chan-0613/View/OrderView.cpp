@@ -1,7 +1,7 @@
 #include "OrderView.h"
-#include <iomanip>
 #include <iostream>
 #include <limits>
+#include "ConsoleFormat.h"
 
 namespace View
 {
@@ -49,18 +49,16 @@ namespace View
             std::cout << "대기 중인 주문이 없습니다.\n";
             return;
         }
-        std::cout << std::left
-            << std::setw(16) << "주문번호"
-            << std::setw(16) << "시료ID"
-            << std::setw(16) << "고객명"
-            << std::setw(8) << "수량" << '\n';
+        std::cout << PadRight("주문번호", 14)
+            << PadRight("시료ID", 14)
+            << PadRight("고객명", 16)
+            << "수량" << '\n';
         for (const auto& order : orders)
         {
-            std::cout << std::left
-                << std::setw(16) << order.GetOrderId()
-                << std::setw(16) << order.GetSampleId()
-                << std::setw(16) << order.GetCustomerName()
-                << std::setw(8) << order.GetQuantity() << '\n';
+            std::cout << PadRight(order.GetOrderId(), 14)
+                << PadRight(order.GetSampleId(), 14)
+                << PadRight(order.GetCustomerName(), 16)
+                << order.GetQuantity() << '\n';
         }
     }
 
@@ -109,18 +107,16 @@ namespace View
             std::cout << "출고 가능한 주문이 없습니다.\n";
             return;
         }
-        std::cout << std::left
-            << std::setw(16) << "주문번호"
-            << std::setw(16) << "시료ID"
-            << std::setw(16) << "고객명"
-            << std::setw(8) << "수량" << '\n';
+        std::cout << PadRight("주문번호", 14)
+            << PadRight("시료ID", 14)
+            << PadRight("고객명", 16)
+            << "수량" << '\n';
         for (const auto& order : orders)
         {
-            std::cout << std::left
-                << std::setw(16) << order.GetOrderId()
-                << std::setw(16) << order.GetSampleId()
-                << std::setw(16) << order.GetCustomerName()
-                << std::setw(8) << order.GetQuantity() << '\n';
+            std::cout << PadRight(order.GetOrderId(), 14)
+                << PadRight(order.GetSampleId(), 14)
+                << PadRight(order.GetCustomerName(), 16)
+                << order.GetQuantity() << '\n';
         }
     }
 

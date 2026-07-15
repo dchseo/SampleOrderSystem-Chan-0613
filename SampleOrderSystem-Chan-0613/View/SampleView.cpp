@@ -1,7 +1,8 @@
 #include "SampleView.h"
-#include <iomanip>
 #include <iostream>
 #include <limits>
+#include <sstream>
+#include "ConsoleFormat.h"
 
 namespace View
 {
@@ -38,21 +39,24 @@ namespace View
     void SampleView::ShowSampleList(const std::vector<Model::Sample>& samples) const
     {
         std::cout << "\n등록 시료 목록 (총 " << samples.size() << "종)\n";
-        std::cout << std::left
-            << std::setw(10) << "ID"
-            << std::setw(20) << "시료명"
-            << std::setw(22) << "평균생산시간"
-            << std::setw(8) << "수율"
-            << std::setw(10) << "재고" << '\n';
+        std::cout << PadRight("ID", 10)
+            << PadRight("시료명", 18)
+            << PadRight("평균생산시간", 16)
+            << PadRight("수율", 8)
+            << "재고" << '\n';
 
         for (const auto& sample : samples)
         {
-            std::cout << std::left
-                << std::setw(10) << sample.GetSampleId()
-                << std::setw(20) << sample.GetName()
-                << std::setw(22) << sample.GetAvgProductionTime()
-                << std::setw(8) << sample.GetYield()
-                << std::setw(10) << sample.GetStock() << '\n';
+            std::ostringstream avgProductionTime;
+            avgProductionTime << sample.GetAvgProductionTime();
+            std::ostringstream yield;
+            yield << sample.GetYield();
+
+            std::cout << PadRight(sample.GetSampleId(), 10)
+                << PadRight(sample.GetName(), 18)
+                << PadRight(avgProductionTime.str(), 16)
+                << PadRight(yield.str(), 8)
+                << sample.GetStock() << '\n';
         }
     }
 

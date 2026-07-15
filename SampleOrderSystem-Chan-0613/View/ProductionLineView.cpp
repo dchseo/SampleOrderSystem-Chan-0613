@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include "ConsoleFormat.h"
 
 namespace View
 {
@@ -58,22 +59,20 @@ namespace View
             std::cout << "대기 중인 생산 작업이 없습니다.\n";
             return;
         }
-        std::cout << std::left
-            << std::setw(10) << "순서"
-            << std::setw(16) << "주문번호"
-            << std::setw(16) << "시료ID"
-            << std::setw(10) << "부족분"
-            << std::setw(10) << "실생산량" << '\n';
+        std::cout << PadRight("순서", 8)
+            << PadRight("주문번호", 14)
+            << PadRight("시료ID", 14)
+            << PadRight("부족분", 10)
+            << "실생산량" << '\n';
 
         int order = 1;
         for (const auto& job : queue)
         {
-            std::cout << std::left
-                << std::setw(10) << order++
-                << std::setw(16) << job.orderId
-                << std::setw(16) << job.sampleId
-                << std::setw(10) << job.shortageQuantity
-                << std::setw(10) << job.actualQuantity << '\n';
+            std::cout << PadRight(std::to_string(order++), 8)
+                << PadRight(job.orderId, 14)
+                << PadRight(job.sampleId, 14)
+                << PadRight(std::to_string(job.shortageQuantity), 10)
+                << job.actualQuantity << '\n';
         }
     }
 }

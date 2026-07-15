@@ -105,6 +105,9 @@
     <ClCompile Include="Controller\OrderController.cpp">
       <Filter>Controller</Filter>
     </ClCompile>
+    <ClCompile Include="View\ConsoleFormat.cpp">
+      <Filter>View</Filter>
+    </ClCompile>
     <ClCompile Include="View\MainMenuView.cpp">
       <Filter>View</Filter>
     </ClCompile>
@@ -184,6 +187,9 @@
     </ClInclude>
     <ClInclude Include="Controller\OrderController.h">
       <Filter>Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="View\ConsoleFormat.h">
+      <Filter>View</Filter>
     </ClInclude>
     <ClInclude Include="View\MainMenuView.h">
       <Filter>View</Filter>
