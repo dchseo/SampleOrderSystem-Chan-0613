@@ -38,3 +38,9 @@
 | 29 | `4a7ad34` | [refactor] OrderController: 상태 검증 조회 패턴을 FindOrderRequiringStatus로 추출 | `ApproveOrder`/`RejectOrder`/`ReleaseOrder`의 중복된 조회+상태검증 블록을 헬퍼로 추출 (behavior-preserving, 56/56 유지) |
 | 30 | `d815b1e` | [docs] Phase 7 — Clean Code/SOLID 트레이드오프 검토 문서 추가 | `docs/CLEAN_CODE_REVIEW.md` 신규 작성 — 계층 분리 재점검 결과와 SRP/ISP/OCP 등 SOLID 트레이드오프 결정 근거 정리 |
 | 31 | `1760c14` | [docs] Phase 7 — README 빌드/실행/폴더 구조 섹션 추가, CLAUDE.md 참고 문서 갱신 | README에 빌드 방법/실행 방법(메인 앱 + 보조 도구 2종)/폴더 구조 요약 섹션 추가, CLAUDE.md 참고 문서 링크 갱신 |
+| 32 | `dd485a7` | [docs] Phase 7 — 전체 커밋 이력을 표로 정리 (docs/COMMIT_HISTORY.md) | 이 문서(docs/COMMIT_HISTORY.md)를 처음 작성 — 당시까지의 전체 커밋을 해시/제목/반영 내용 표로 정리 |
+| 33 | `e5672cd` | [docs] Phase 7 요약 표 갱신 | docs/PLAN.md "단계별 참고 매핑 요약" 표의 Phase 7 행을 실제 작업 범위(트레이드오프 검토+리팩토링+문서화)에 맞게 갱신 |
+| 34 | `036cdd8` | [fix] View 테이블 헤더에서 한글 컬럼명이 setw 폭을 넘어 다음 컬럼과 붙는 문제 수정 | 사용자 리포트로 발견 — `std::setw`이 한글의 UTF-8 바이트 길이를 기준으로 폭을 계산해 "평균생산시간"/"수율" 등 헤더 컬럼명이 다음 컬럼과 붙어 출력되던 문제를, SampleView/OrderView/ProductionLineView의 setw 폭을 넓혀 1차로 수정 |
+| 35 | `e860e3e` | [fix] data/ 폴더 부재 시 저장 무시 및 보조 도구의 잘못된 상대 경로로 인한 데이터 유실 수정 | 사용자 리포트(재시작 시 데이터 초기화)로 발견 — `data/` 폴더가 없으면 저장이 예외 없이 조용히 실패하는 문제를 `create_directories`로 해결하고, 도구(DataMonitor/DummyDataGenerator)가 메인 앱과 다른 데이터 폴더를 가리키던 상대 경로 버그(`../../data` → `data`)도 함께 수정 |
+| 36 | `b4ba629` | [fix] 콘솔 표에서 한글 헤더와 데이터 행의 열이 어긋나는 문제 수정 (표시 폭 기반 패딩 도입) | 34번 수정 이후에도 헤더-데이터 열이 어긋난다는 후속 리포트로 근본 원인(바이트 길이 vs 표시 폭 불일치)을 발견 — `View/ConsoleFormat.h/.cpp`에 UTF-8 표시 폭 기반 `PadRight`를 신규 작성해 모든 View 표 출력에 적용 |
+| 37 | `9f5b5ad` | [feat] 콘솔 표 헤더 구분선 추가, 재고 상태 색상(여유/부족/고갈), 상단 시스템 상태 굵은 파란색 표시 | 사용자 요청으로 콘솔 UI 가독성 개선 — 표 헤더 아래 구분선 추가, 재고 상태(여유=녹색/부족=노란색/고갈=빨간색) 색상 적용, 최상단 시스템 상태 정보를 굵은 파란색으로 표시(ANSI 컬러, ENABLE_VIRTUAL_TERMINAL_PROCESSING 활성화) |
