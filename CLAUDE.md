@@ -279,9 +279,14 @@ SampleOrderSystem-Chan-0613/
 │   └── ProductionLineView.h / .cpp          # "완료 처리" 메뉴 제거, 진행률/완료 예정 시각 표시 추가
 ├── data/
 │   ├── samples.json / orders.json / production_queue.json
-├── tools/
-│   ├── DataMonitor/                         # DataMonitor PoC 이식 (읽기 전용 폴링 대시보드)
-│   └── DummyDataGenerator/                  # DummyDataGenerator PoC 이식 (더미 데이터 시딩)
+├── tools/                                    # 각각 별도 vcxproj(별도 .exe), 솔루션에 추가되어 있음
+│   ├── DataMonitor/                         # DataMonitor PoC 이식 (읽기 전용 폴링 대시보드,
+│   │                                        # 생산 라인 현황 포함, 잔여율 게이지는 미구현)
+│   │                                        # Model/Controller/Json은 원본 PoC가 아니라 이 저장소의
+│   │                                        # 현재 스키마(InventoryLevel/startTime 포함)를 복사
+│   └── DummyDataGenerator/                  # DummyDataGenerator PoC 이식 (더미 데이터 시딩).
+│                                            # RandomSampleGenerator가 생성 재고에 따라
+│                                            # InventoryLevel도 함께 설정(신규 스키마 대응)
 ├── tests/
 │   ├── TestFramework.h / .cpp                # 최소 assert 기반 테스트 러너 (Phase 0에서 구성)
 │   │                                         # TEST(suite, name), ASSERT_TRUE/EQ/THROWS 매크로 제공

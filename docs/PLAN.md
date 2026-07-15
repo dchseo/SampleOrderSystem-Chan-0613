@@ -317,22 +317,61 @@ Phase 2 완료 시점까지의 모든 테스트는 픽스처마다 시료를 하
 
 ---
 
-## Phase 5 — 보조 도구 통합 (DataMonitor / DummyDataGenerator)
+## Phase 5 — 보조 도구 통합 (DataMonitor / DummyDataGenerator) ✅ 완료
 
 **목표**: 별도 PoC로 개발했던 "데이터 모니터링 Tool"과 "Dummy 데이터 생성 Tool"을 최종 시스템의 데이터와
-연결한다. (진행 원칙 참고 — 메인 애플리케이션과 파일이 겹치지 않으므로 sub-agent 위임 대상 후보)
+연결한다.
 
-- [ ] `tools/DataMonitor/` — [DataMonitor PoC](../../DataMonitor-Chan-0613)의 `View/DashboardView`,
-      `main.cpp`(폴링 루프)를 이식. `kSamplesFilePath`/`kOrdersFilePath`를 본 저장소의 `data/` 경로로
-      변경. 생산 라인 모니터링은 Phase 1에서 영속화가 추가되었으므로, DataMonitor CLAUDE.md에서
-      "아직 영속화되지 않아 제외"했던 생산 라인 현황도 이번에는 포함 (읽기 전용 폴링 패턴 동일 적용)
-- [ ] `tools/DummyDataGenerator/` — [DummyDataGenerator PoC](../../DummyDataGenerator-Chan-0613)의
-      `Generator/RandomSampleGenerator`, `RandomOrderGenerator`, `main.cpp`를 이식. 동일하게 `data/`
-      경로만 변경
-- [ ] 두 도구 모두 **별도 실행 파일**로 빌드하여, 메인 애플리케이션과 동시에 실행해도 안전한지
-      (읽기 전용 폴링이 쓰기와 충돌하지 않는지) 확인
+**진행 방식에 대한 메모**: 진행 원칙에는 이 Phase를 sub-agent 위임 후보로 적어 두었으나, 실제로는
+메인 대화에서 직접 진행했다. Sample에 `InventoryLevel` 캐시 필드가 추가되고 `ProductionJob`에
+`startTime`이 추가되는 등 원본 DataMonitor/DummyDataGenerator PoC 이후 스키마가 여러 차례
+바뀌었기 때문에, 새 sub-agent가 이 변경 이력을 처음부터 다시 파악하게 하는 것보다 이미 전체
+맥락을 가진 채 직접 이식·조정하는 편이 더 안전하고 빠르다고 판단함.
 
-**참고 저장소**: DataMonitor, DummyDataGenerator
+- [x] `tools/DataMonitor/` — DataMonitor PoC의 `View/DashboardView`, `main.cpp`(폴링 루프) 구조를
+      가져오되, **원본 PoC repository가 아니라 이 저장소의 현재 Model/Controller 코드를 복사해
+      이식**함(원본 PoC의 Sample/ProductionJob에는 `InventoryLevel`/`startTime` 필드가 없어 스키마가
+      맞지 않음). `kSamplesFilePath`/`kOrdersFilePath`/`kProductionQueueFilePath`를 본 앱과 공유하는
+      `../../data/` 경로로 지정(도구의 프로젝트 폴더 기준 상대 경로). 생산 라인 현황을 신규 포함
+      (Phase 1에서 영속화가 추가됐으므로) — `JsonProductionLineRepository::LoadQueue()`로 읽기 전용
+      조회만 하고 정산(`SettleProductionQueue`)은 호출하지 않는다(순수 관전자 역할 유지). PDF
+      "잔여율" 게이지는 본 앱과 동일하게 제외
+- [x] `tools/DummyDataGenerator/` — DummyDataGenerator PoC의 `Generator/RandomSampleGenerator`,
+      `RandomOrderGenerator`, `IdSequence.h`, `main.cpp` 구조를 가져오되 동일한 이유로 현재 Model
+      코드를 복사해 이식. `RandomSampleGenerator`는 계획에 없던 보정 추가: 생성된 재고가 0보다 크면
+      `InventoryLevel::Sufficient`, 아니면 `Depleted`로 설정 — 그렇지 않으면 재고가 있는 더미 시료도
+      DataMonitor에 "고갈"로 잘못 표시된다(원본 PoC에는 이 필드 자체가 없어 발생하지 않던 문제).
+      더미 주문은 `ApproveOrder`를 거치지 않으므로 상태가 `PRODUCING`이어도 생산 큐에 대응 작업이
+      생기지 않는다는 제한을 코드 주석과 CLAUDE.md에 명시
+- [x] 두 도구 모두 **별도 vcxproj 프로젝트**(`DataMonitor.vcxproj`, `DummyDataGenerator.vcxproj`)로
+      빌드해 솔루션(`.slnx`)에 추가. 메인 애플리케이션과 실제로 **동시에 실행**해 안전성 확인 (아래
+      "수동 검증 결과" 참고)
+
+### 수동 검증 결과
+
+- `DummyDataGenerator.exe 4 6`으로 시료 4건/주문 6건을 공유 `data/` 폴더에 생성 → 파일 내용 확인
+  (재고 있는 시료는 `inventoryLevel: "SUFFICIENT"`로 올바르게 채워짐)
+- `SampleOrderSystem-Chan-0613.exe`로 더미 데이터를 그대로 인식(등록 시료/총 재고/전체 주문 수 일치)
+  하고, 더미 주문 승인·출고까지 정상 처리됨을 확인
+- `DataMonitor.exe`가 더미 데이터와, 메인 앱이 승인한 재고 부족 주문의 생산 큐(진행률/완료 예정
+  시각 포함)를 정확히 읽어 표시함을 확인
+- **동시 실행 테스트**: `DataMonitor.exe`를 백그라운드에서 5회 새로고침(1초 주기)으로 돌리는 동안,
+  메인 애플리케이션으로 주문 출고 처리를 실행 → DataMonitor의 `RELEASED` 집계가 2건→3건으로 실행
+  도중 정확히 갱신되고, 5회 내내 크래시나 예외 없이 정상 종료됨을 확인(읽기 전용 폴링이 다른
+  프로세스의 쓰기와 충돌하지 않음)
+- 검증 중 첫 출고 시도가 실패했으나, 원인은 테스트 입력 스크립트 자체의 실수(출고 처리 메뉴는
+  하위 메뉴 없이 바로 주문번호를 입력받는데 여분의 줄을 넣음)였고 앱 결함이 아니었음을 스크립트
+  수정 후 재확인함 — 별도 `[fix]` 커밋 없음
+
+### 빌드 검증
+
+- `MSBuild.exe ... /p:PlatformToolset=v143`로 솔루션 전체(`SampleOrderSystem-Chan-0613.exe`,
+  `DataMonitor.exe`, `DummyDataGenerator.exe`) 빌드 성공 (경고 없음)
+- `SampleOrderSystem-Chan-0613.exe --test` 실행 → **56/56 테스트 통과**, 종료 코드 0 (보조 도구
+  추가로 인한 회귀 없음)
+
+**참고 저장소**: DataMonitor, DummyDataGenerator (단, 실제 이식 소스는 이 저장소의 현재 Model/
+Controller 코드)
 
 ---
 
@@ -384,6 +423,6 @@ Phase 2 완료 시점까지의 모든 테스트는 픽스처마다 시료를 하
 | 2. Controller/재고 로직 | ConsoleMVC | 높음 (재고 반영·재평가, 실시간 정산 로직 + Unit/적대적 테스트 대부분) |
 | 3. View | ConsoleMVC | 낮음 (요약 정보만 추가, 입력 검증 테스트 소량) |
 | 4. main.cpp 조립 | ConsoleMVC, DataPersistence | 낮음 (조립 + 통합 적대적 테스트 1건) |
-| 5. 보조 도구 | DataMonitor, DummyDataGenerator | 낮음 (경로 조정 위주) |
+| 5. 보조 도구 | DataMonitor, DummyDataGenerator | 중간 (현재 스키마로 재이식 + 별도 vcxproj 2개 신규 구성) |
 | 6. 테스트 회귀·정리 | - | 낮음 (신규 작성 없음 — 회귀 실행/커버리지 점검만) |
 | 7. 마무리 | 전체 | 낮음 |
