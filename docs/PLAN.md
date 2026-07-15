@@ -28,24 +28,44 @@
 
 ---
 
-## Phase 0 — 프로젝트 스캐폴딩
+## Phase 0 — 프로젝트 스캐폴딩 ✅ 완료
 
 **목표**: 4개 PoC를 조립할 빈 골격을 준비한다.
 
-- [ ] `SampleOrderSystem-Chan-0613/` vcxproj에 `Model/`, `View/`, `Controller/`, `Json/`, `data/`,
-      `tools/`, `tests/` 폴더 구조 생성 (현재는 빈 vcxproj만 존재)
-- [ ] `docs/PRD.md` 작성 — 기능 명세(PDF Chapter 2)를 요구사항 문서 형태로 정리
-      (메뉴별 입력/출력, 상태 전이 표, 계산 공식을 표 형태로 재정리)
-- [ ] `.gitignore` 정리 (`x64/`, `.vs/`, `*.user` 등 빌드 산출물 제외)
-- [ ] **MSBuild 등록 습관화**: 이후 Phase(1~5)에서 PoC로부터 파일을 복사해 넣을 때마다, 폴더에
-      넣는 것만으로는 컴파일되지 않으므로 반드시 `.vcxproj`의 `ClInclude`/`ClCompile` `ItemGroup`과
-      `.vcxproj.filters`에 함께 추가한다. 현재 vcxproj는 `ItemGroup`이 비어 있는 상태([CLAUDE.md](../CLAUDE.md)
-      "기술 스택" 참고) — 파일을 추가한 직후 빌드가 실제로 그 파일을 컴파일하는지 매번 확인한다.
-- [ ] **신규**: 테스트 하네스(러너) 최소 골격을 `tests/`에 미리 구성한다 — 외부 프레임워크 의존
-      없이(기존 PoC들의 "외부 의존성 없음" 원칙 유지) 간단한 assert 기반 러너, 실패 시 비정상
-      종료 + 실패 목록 출력. `tests/unit/`, `tests/adversarial/`로 스위트를 분리해, Phase 1부터
-      바로 테스트를 추가할 수 있게 한다(각 Phase 섹션의 Unit Test/적대적 테스트 항목 참고). 별도
-      테스트 실행용 vcxproj 타겟(또는 콘솔 인자로 테스트 모드 진입)도 이 단계에서 함께 준비한다.
+- [x] `SampleOrderSystem-Chan-0613/` vcxproj에 `Model/`, `View/`, `Controller/`, `Json/`, `data/`,
+      `tools/`, `tests/unit/`, `tests/adversarial/` 폴더 구조 생성. 아직 내용이 없는 폴더
+      (`Model`, `View`, `Controller`, `Json`, `tools`, `data`)에는 `.gitkeep`을 두어 Git에 빈
+      폴더 구조가 보이도록 함
+- [x] `docs/PRD.md` 작성 — 기능 명세(PDF Chapter 1·2)를 요구사항 문서 형태로 정리 (용어 정의,
+      메뉴별 입력/출력, 상태 전이 표, 계산 공식, 비기능 요구사항)
+- [x] `.gitignore` 정리 — 기존 VisualStudio 표준 무시 규칙(`x64/`, `.vs/`, `*.user` 등)은 이미
+      충분했음. `SampleOrderSystem-Chan-0613/data/*.json`(런타임 생성 데이터)만 추가로 무시하고
+      `data/.gitkeep`은 예외 처리 (DataPersistence PoC와 동일 규약)
+- [x] **MSBuild 등록 습관화**: `main.cpp`, `tests/TestFramework.h/.cpp`,
+      `tests/unit/FrameworkSelfTest.cpp`, `tests/adversarial/FrameworkSelfTest.cpp`를
+      `.vcxproj`/`.vcxproj.filters`에 등록. `/p:PlatformToolset=v143`으로 실제 MSBuild 빌드를
+      돌려 컴파일 대상에 포함되었는지 검증함(아래 "빌드 검증" 참고)
+- [x] 테스트 하네스(러너) 최소 골격을 `tests/`에 구성 — `TestFramework.h/.cpp`에 `TEST(suite, name)`
+      매크로와 `ASSERT_TRUE`/`ASSERT_FALSE`/`ASSERT_EQ`/`ASSERT_THROWS` 매크로, `TestRegistry`를
+      구현. **"콘솔 인자로 테스트 모드 진입"** 방식을 채택 — 별도 vcxproj 타겟 대신, `main.cpp`가
+      `--test` 인자를 받으면 `Testing::TestRegistry::Instance().RunAll()`을 실행하고 실패 개수를
+      종료 코드로 반환한다 (실패 0건 → 0, 그 외 → 1). `tests/unit/FrameworkSelfTest.cpp`,
+      `tests/adversarial/FrameworkSelfTest.cpp`에 하네스 자체를 검증하는 self-test 5건을 작성해
+      `SampleOrderSystem-Chan-0613.exe --test`로 전부 통과 확인함
+
+### 빌드 검증
+
+- `MSBuild.exe SampleOrderSystem-Chan-0613.slnx /p:Configuration=Debug /p:Platform=x64
+  /p:PlatformToolset=v143` 로 빌드 성공 확인 (로컬에 v145 툴셋 없어 v143으로 오버라이드 — 앞선
+  PoC들과 동일)
+- 빌드 중 **서로 다른 폴더의 동일 파일명(`tests/unit/FrameworkSelfTest.cpp` vs
+  `tests/adversarial/FrameworkSelfTest.cpp`)이 오브젝트 파일 이름 충돌을 일으키는 것을 실제로
+  발견**(`MSB8027` 경고 + `LNK4042`, 한쪽 파일의 테스트가 조용히 링크에서 빠짐). 모든 `ClCompile`
+  설정에 `<ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>`를 추가해 해결하고
+  [CLAUDE.md](../CLAUDE.md) "기술 스택"에 이 실무적 함정을 기록함
+- `SampleOrderSystem-Chan-0613.exe --test` 실행 → 5/5 테스트 통과, 종료 코드 0 확인
+- `SampleOrderSystem-Chan-0613.exe` (인자 없음) 실행 → Phase 0 임시 안내 메시지가 한글 깨짐 없이
+  출력되는 것 확인 (UTF-8 콘솔 코드페이지 설정 검증)
 
 **참고 저장소**: 없음 (신규)
 

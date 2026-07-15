@@ -260,8 +260,13 @@ SampleOrderSystem-Chan-0613/
 ├── tools/
 │   ├── DataMonitor/                         # DataMonitor PoC 이식 (읽기 전용 폴링 대시보드)
 │   └── DummyDataGenerator/                  # DummyDataGenerator PoC 이식 (더미 데이터 시딩)
-├── tests/                                   # Model/Repository 단위 테스트
-├── main.cpp                                 # Json Repository 구현체 조립(DI)
+├── tests/
+│   ├── TestFramework.h / .cpp                # 최소 assert 기반 테스트 러너 (Phase 0에서 구성)
+│   │                                         # TEST(suite, name), ASSERT_TRUE/EQ/THROWS 매크로 제공
+│   ├── unit/                                 # Unit Test (Phase별로 그 자리에서 추가, PLAN.md 참고)
+│   └── adversarial/                          # 적대적 테스트 (Phase별로 그 자리에서 추가)
+├── main.cpp                                 # Phase 0~3: 임시 진입점("--test"로 테스트 실행) →
+│                                             # Phase 4: Json Repository 구현체 조립(DI)으로 교체
 └── docs/
     ├── PRD.md
     └── PLAN.md
@@ -284,14 +289,21 @@ SampleOrderSystem-Chan-0613/
   `/p:PlatformToolset=v143`으로 오버라이드 가능 — 앞선 PoC들에서 확인됨)
 - **MSBuild는 CMake처럼 폴더를 스캔해 소스 파일을 자동으로 인식하지 않는다.** 다른 PoC에서 파일을
   폴더에 복사해 넣는 것만으로는 컴파일 대상에 포함되지 않으며, 반드시 `.vcxproj`의 `ClInclude`/
-  `ClCompile` `ItemGroup`과 `.vcxproj.filters`에 명시적으로 추가해야 한다. 현재
-  `SampleOrderSystem-Chan-0613.vcxproj`는 `<ItemGroup></ItemGroup>`이 비어 있는 상태이므로,
-  Phase 0~1에서 파일을 옮길 때마다 이 등록 작업을 빠뜨리지 않는다 ([docs/PLAN.md](docs/PLAN.md)
-  Phase 0 체크리스트 참고).
+  `ClCompile` `ItemGroup`과 `.vcxproj.filters`에 명시적으로 추가해야 한다. Phase 0에서
+  `main.cpp`/`tests/*`를 등록하며 이 습관을 확립했다 — 이후 Phase에서 파일을 추가할 때마다 계속
+  빠뜨리지 않는다 ([docs/PLAN.md](docs/PLAN.md) 각 Phase 체크리스트 참고).
+- **서로 다른 폴더에 같은 이름의 `.cpp` 파일이 있으면 기본 설정에서 오브젝트 파일 이름이 충돌한다**
+  (`MSB8027` 경고, 링크 시 한쪽이 조용히 무시됨 — Phase 0에서 `tests/unit/FrameworkSelfTest.cpp`와
+  `tests/adversarial/FrameworkSelfTest.cpp`를 추가하며 실제로 겪음). 이 프로젝트는 모든 `ClCompile`
+  설정에 `<ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>`를 지정해 폴더별로 오브젝트
+  파일을 분리함으로써 해결했다 — 새 파일을 추가할 때 이름이 겹쳐도 안전하다. 빌드 시 이 경고
+  (`둘 이상의 파일이 같은 위치에 출력을 생성합니다`)가 다시 나타나면 신규 파일 경로를 점검한다.
 - 대상: Windows Console Application (Win32 / x64, Debug / Release)
 - 외부 의존성 없음 — JSON 처리는 자체 구현 `JsonLib`만 사용, 난수는 표준 라이브러리 `<random>`만 사용
 - 소스 파일은 BOM 없는 UTF-8이므로, 한글 리터럴이 포함된 모든 `ClCompile` 항목에 `/utf-8`을 지정한다.
   콘솔 코드페이지도 `SetConsoleOutputCP(CP_UTF8)`/`SetConsoleCP(CP_UTF8)`로 맞춘다.
+- 로컬 빌드 확인 명령(PlatformToolset이 v145가 없는 환경): `MSBuild.exe
+  SampleOrderSystem-Chan-0613.slnx /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v143`
 
 ## 커밋/문서 관리
 
