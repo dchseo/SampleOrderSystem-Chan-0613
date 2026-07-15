@@ -252,6 +252,8 @@ SampleOrderSystem-Chan-0613/
 │   ├── Order.h / .cpp                       # OrderStatus enum
 │   ├── ProductionLine.h / .cpp              # ProductionJob(startTime), 벌크 접근자
 │   │                                        # + Phase 2: SetCurrentJobStartTime 추가
+│   │                                        # + Phase 3: ProductionJob::CompletionTime() 추가
+│   │                                        # (Controller/View가 공유하는 완료 시각 계산 헬퍼)
 │   ├── Dtos.h                               # OrderApprovalResult, InventoryStatusItem 등
 │   ├── InventoryLevel.h / .cpp              # 신규(Phase 2) — Dtos.h/Sample.h 순환 include 방지용 분리
 │   ├── InventoryCalculator.h / .cpp         # 신규(Phase 1) — 부족분/실생산량/재고상태 순수 계산 함수
@@ -266,8 +268,9 @@ SampleOrderSystem-Chan-0613/
 │   │                                        # 대비 시그니처 확장, Phase 2)
 │   └── MonitoringController.h / .cpp        # GetInventoryStatus는 Sample의 캐시값을 그대로 반환
 ├── View/
-│   ├── MainMenuView.h / .cpp                # 요약 정보(등록 시료 수/총 재고/전체 주문/생산 대기) 표시
-│   ├── SampleView / OrderView / MonitoringView / ProductionLineView
+│   ├── MainMenuView.h / .cpp                # 요약 정보(Model::MainMenuSummary) 표시
+│   ├── SampleView / OrderView / MonitoringView       # ConsoleMVC에서 변경 없이 이식
+│   └── ProductionLineView.h / .cpp          # "완료 처리" 메뉴 제거, 진행률/완료 예정 시각 표시 추가
 ├── data/
 │   ├── samples.json / orders.json / production_queue.json
 ├── tools/

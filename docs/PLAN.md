@@ -214,36 +214,36 @@
 
 ---
 
-## Phase 3 — View 계층 이식 및 메인 메뉴 요약 정보 보강
+## Phase 3 — View 계층 이식 및 메인 메뉴 요약 정보 보강 ✅ 완료
 
 **목표**: 콘솔 UI를 완성하고, 메인 메뉴에 요구되는 요약 정보를 추가한다.
 
-- [ ] `View/SampleView` — ConsoleMVC에서 그대로 복사. 시료 등록 화면은 시료 ID/이름/평균
-      생산시간/수율 4개 입력만 받는다 — **재고는 입력받지 않으며 항상 0으로 시작**한다(CLAUDE.md
-      "시스템 규칙" 참고)
-- [ ] `View/OrderView` — ConsoleMVC에서 그대로 복사 (필요 시 문구만 다듬기)
-- [ ] `View/MonitoringView` — ConsoleMVC에서 복사하되, **PDF 예시 UI(페이지 19)의 "잔여율"(%) 게이지
-      바는 구현하지 않는다.** 시료별 재고 수량과 여유/부족/고갈 라벨만 표시한다(CLAUDE.md "시스템
-      규칙" 참고)
-- [ ] `View/ProductionLineView` — ConsoleMVC에서 복사하되, **"완료 처리" 메뉴 항목은 제거**한다.
-      생산 완료는 더 이상 사용자가 트리거하는 동작이 아니라 실제 시간 경과에 따라 자동으로
-      정산되기 때문이다(CLAUDE.md §3). 이 화면을 열 때마다 Controller가 먼저 `SettleQueue`를
-      호출해 최신 상태를 반영한 뒤, 현재 처리 중인 작업/대기열만 조회 전용으로 표시한다. **(권장)**
-      `Current` 작업의 진행률(%)과 완료 예정 시각을, 저장된 `StartTime`으로부터 추가 계산 없이 함께
-      표시한다(PDF 예시 UI 페이지 21, CLAUDE.md §3 "권장" 참고) — 필수는 아니다.
-- [ ] `View/MainMenuView` — ConsoleMVC 버전을 기반으로, PDF 예시 UI처럼 **요약 정보**(등록 시료 종수,
-      총 재고, 전체 주문 건수, 생산 라인 대기 건수)를 상단에 표시하도록 확장. 이 정보는
-      `SampleController.ListSamples()` + `MonitoringController` 조회 결과를 조합해 계산 (View 자체는
-      로직을 갖지 않고 Controller 결과만 렌더링). **메뉴 항목은 시료 관리/시료 주문/주문 승인·거절/
-      모니터링/생산 라인 조회/출고 처리 6개 + 종료**로 구성한다(CLAUDE.md "시스템 규칙" 참고 — PDF
-      기능 명세 표는 5개 카테고리로 설명하지만 예시 UI는 6개 메뉴로 분리되어 있음)
-- [ ] 화면 레이아웃은 PDF의 예시 화면을 참고하되 자유롭게 구성 (PDF도 "화면 구성은 자유롭게 결정"이라
-      명시)
+- [x] `View/SampleView`, `View/OrderView`, `View/MonitoringView` — ConsoleMVC에서 파일 그대로(`cp`)
+      이식, 수정 없음. `MonitoringView`는 원래부터 "잔여율" 게이지를 구현하지 않고 있어 별도 조치
+      불필요했음(확인만 함). `SampleView`도 재고 입력 필드가 없는 4개 입력(ID/이름/평균생산시간/
+      수율)만 받는 상태로 이미 맞았음
+- [x] `View/ProductionLineView` — "완료 처리" 메뉴 항목과 `ShowCompletionResult`를 제거. **(권장)**
+      진행률/완료 예정 시각 표시를 실제로 구현함: `ShowCurrentProduction(job, now)`이 저장된
+      `startTime`/`totalProductionTime`으로 진행률(%)과 완료 예정 시각(`localtime_s` 기반 `HH:MM`)을
+      계산해 표시. 이 계산에 필요한 `ProductionJob::CompletionTime()`을 Model에 신규 추가하고,
+      Phase 2에서 `OrderController`가 직접 계산하던 동일 로직을 이 메서드 재사용으로 리팩터링해
+      중복을 제거함(계획에 없던 정리)
+- [x] `View/MainMenuView` — `Model::MainMenuSummary`(신규 DTO: 등록 시료 종수/총 재고/전체 주문
+      건수/생산 라인 대기 건수)를 받아 상단에 표시하도록 확장. 계산 책임은
+      `MonitoringController::GetMainMenuSummary(productionLine)`(신규)에 둠 — View는 렌더링만.
+      메뉴는 원래부터 6개 항목 + 종료로 되어 있어 별도 조치 불필요했음(확인만 함)
+- [x] 화면 레이아웃은 PDF 예시를 참고해 자유롭게 구성
 
-**적대적 테스트 (이 Phase에서 바로 작성)**
-- [ ] 잘못된 메뉴 입력값: 존재하지 않는 메뉴 번호, 숫자가 아닌 입력, 빈 입력이 View에서 크래시 없이
-      "잘못된 선택" 안내 후 메뉴로 복귀하는지 검증 (View는 로직을 갖지 않으므로 입력 파싱/가드 로직만
-      대상으로 최소한으로 확인)
+**적대적 테스트 (이 Phase에서 바로 작성) — `tests/adversarial/MainMenuViewAdversarialTest.cpp`, 3건**
+- [x] 잘못된 메뉴 입력값: 숫자가 아닌 입력 후에도 스트림이 정상 상태로 복구되어 다음 입력을 이어서
+      읽는지, 범위 밖 메뉴 번호, 빈 입력(즉시 EOF) 모두 크래시 없이 `Invalid`를 반환하는지 검증.
+      `std::cin`의 streambuf를 임시로 바꿔치기해 검증하며, 테스트 실패 시에도 RAII로 반드시
+      원상복구되도록 함(다른 테스트에 영향 주지 않기 위함)
+
+### 빌드 검증
+
+- `MSBuild.exe ... /p:PlatformToolset=v143` 빌드 성공 (경고 없음)
+- `SampleOrderSystem-Chan-0613.exe --test` 실행 → **54/54 테스트 통과**, 종료 코드 0
 
 **참고 저장소**: ConsoleMVC
 
