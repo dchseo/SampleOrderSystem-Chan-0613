@@ -22,6 +22,10 @@
 - [ ] `docs/PRD.md` 작성 — 기능 명세(PDF Chapter 2)를 요구사항 문서 형태로 정리
       (메뉴별 입력/출력, 상태 전이 표, 계산 공식을 표 형태로 재정리)
 - [ ] `.gitignore` 정리 (`x64/`, `.vs/`, `*.user` 등 빌드 산출물 제외)
+- [ ] **MSBuild 등록 습관화**: 이후 Phase(1~5)에서 PoC로부터 파일을 복사해 넣을 때마다, 폴더에
+      넣는 것만으로는 컴파일되지 않으므로 반드시 `.vcxproj`의 `ClInclude`/`ClCompile` `ItemGroup`과
+      `.vcxproj.filters`에 함께 추가한다. 현재 vcxproj는 `ItemGroup`이 비어 있는 상태([CLAUDE.md](../CLAUDE.md)
+      "기술 스택" 참고) — 파일을 추가한 직후 빌드가 실제로 그 파일을 컴파일하는지 매번 확인한다.
 
 **참고 저장소**: 없음 (신규)
 
@@ -120,16 +124,25 @@
 
 **목표**: 콘솔 UI를 완성하고, 메인 메뉴에 요구되는 요약 정보를 추가한다.
 
-- [ ] `View/SampleView`, `View/OrderView`, `View/MonitoringView` — ConsoleMVC에서 그대로 복사
-      (필요 시 문구만 다듬기)
+- [ ] `View/SampleView` — ConsoleMVC에서 그대로 복사. 시료 등록 화면은 시료 ID/이름/평균
+      생산시간/수율 4개 입력만 받는다 — **재고는 입력받지 않으며 항상 0으로 시작**한다(CLAUDE.md
+      "시스템 규칙" 참고)
+- [ ] `View/OrderView` — ConsoleMVC에서 그대로 복사 (필요 시 문구만 다듬기)
+- [ ] `View/MonitoringView` — ConsoleMVC에서 복사하되, **PDF 예시 UI(페이지 19)의 "잔여율"(%) 게이지
+      바는 구현하지 않는다.** 시료별 재고 수량과 여유/부족/고갈 라벨만 표시한다(CLAUDE.md "시스템
+      규칙" 참고)
 - [ ] `View/ProductionLineView` — ConsoleMVC에서 복사하되, **"완료 처리" 메뉴 항목은 제거**한다.
       생산 완료는 더 이상 사용자가 트리거하는 동작이 아니라 실제 시간 경과에 따라 자동으로
       정산되기 때문이다(CLAUDE.md §3). 이 화면을 열 때마다 Controller가 먼저 `SettleQueue`를
-      호출해 최신 상태를 반영한 뒤, 현재 처리 중인 작업/대기열만 조회 전용으로 표시한다.
+      호출해 최신 상태를 반영한 뒤, 현재 처리 중인 작업/대기열만 조회 전용으로 표시한다. **(권장)**
+      `Current` 작업의 진행률(%)과 완료 예정 시각을, 저장된 `StartTime`으로부터 추가 계산 없이 함께
+      표시한다(PDF 예시 UI 페이지 21, CLAUDE.md §3 "권장" 참고) — 필수는 아니다.
 - [ ] `View/MainMenuView` — ConsoleMVC 버전을 기반으로, PDF 예시 UI처럼 **요약 정보**(등록 시료 종수,
       총 재고, 전체 주문 건수, 생산 라인 대기 건수)를 상단에 표시하도록 확장. 이 정보는
       `SampleController.ListSamples()` + `MonitoringController` 조회 결과를 조합해 계산 (View 자체는
-      로직을 갖지 않고 Controller 결과만 렌더링)
+      로직을 갖지 않고 Controller 결과만 렌더링). **메뉴 항목은 시료 관리/시료 주문/주문 승인·거절/
+      모니터링/생산 라인 조회/출고 처리 6개 + 종료**로 구성한다(CLAUDE.md "시스템 규칙" 참고 — PDF
+      기능 명세 표는 5개 카테고리로 설명하지만 예시 UI는 6개 메뉴로 분리되어 있음)
 - [ ] 화면 레이아웃은 PDF의 예시 화면을 참고하되 자유롭게 구성 (PDF도 "화면 구성은 자유롭게 결정"이라
       명시)
 
