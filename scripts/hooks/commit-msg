@@ -1,0 +1,19 @@
+#!/bin/sh
+# 커밋 메시지 제목 줄이 [prefix] 형식을 따르는지 검증한다.
+# 적용: git config core.hooksPath scripts/hooks (README.md "템플릿/훅 적용 방법" 참고)
+
+commit_msg_file="$1"
+subject_line=$(grep -v '^#' "$commit_msg_file" | grep -v '^[[:space:]]*$' | head -n 1)
+
+allowed_prefixes="feat|fix|refactor|docs|test|chore|style|perf"
+pattern="^\[($allowed_prefixes)\] .+"
+
+if ! echo "$subject_line" | grep -Eq "$pattern"; then
+    echo "커밋 메시지 제목이 컨벤션을 따르지 않습니다." >&2
+    echo "  형식: [prefix] 한 줄 요약" >&2
+    echo "  허용 prefix: feat, fix, refactor, docs, test, chore, style, perf" >&2
+    echo "  현재 제목: \"$subject_line\"" >&2
+    exit 1
+fi
+
+exit 0
