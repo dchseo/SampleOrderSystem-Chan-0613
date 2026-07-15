@@ -71,44 +71,57 @@
 
 ---
 
-## Phase 1 — Model / Repository 계층 이식
+## Phase 1 — Model / Repository 계층 이식 ✅ 완료
 
 **목표**: 검증된 도메인 모델과 JSON Repository를 그대로 가져와 빌드 가능한 상태로 만든다.
 
-- [ ] `Model/Sample.h/.cpp`, `Model/Order.h/.cpp` — [DataPersistence](../../DataPersistence-Chan-0613)에서
-      `ToJson`/`FromJson` 포함 버전을 그대로 복사
-- [ ] `Model/Dtos.h` — [ConsoleMVC](../../ConsoleMVC-Chan-0613)에서 그대로 복사
+- [x] `Model/Sample.h/.cpp`, `Model/Order.h/.cpp` — [DataPersistence](../../DataPersistence-Chan-0613)에서
+      `ToJson`/`FromJson` 포함 버전을 파일 그대로 복사(`cp`)해 바이트 단위로 동일하게 이식
+- [x] `Model/Dtos.h` — [ConsoleMVC](../../ConsoleMVC-Chan-0613)에서 그대로 복사
       (`OrderApprovalResult`, `InventoryLevel`, `InventoryStatusItem`, `OrderStatusSummary`)
-- [ ] `Model/Repository/ISampleRepository.h`, `IOrderRepository.h` — 그대로 복사 (시그니처 변경 금지)
-- [ ] `Model/Repository/JsonSampleRepository.h/.cpp`, `JsonOrderRepository.h/.cpp` — DataPersistence에서
-      그대로 복사, 파일 경로만 이 저장소의 `data/samples.json`, `data/orders.json`으로 지정
-- [ ] `Json/` (JsonLib 전체) — DataPersistence/DataMonitor/DummyDataGenerator에서 공통으로 쓰던 버전을
-      그대로 복사 (수정 없이 소비)
-- [ ] **신규**: `Model/ProductionLine.h/.cpp` — ConsoleMVC의 `ProductionJob`/`ProductionLine`을 가져오되,
-      `ProductionJob`에 `ToJson()`/`FromJson()` 추가 (CLAUDE.md의 "필드 ↔ JSON 키 매핑" 원칙 적용:
-      `orderId`, `sampleId`, `shortageQuantity`, `actualQuantity`, `totalProductionTime`)
-      **+ 신규 필드 `startTime`(벽시계 타임스탬프)** 추가 — [CLAUDE.md](../CLAUDE.md)의
-      "재고 및 생산 라인 처리 규칙 (상세) § 3. 생산 라인 실시간 정산"에서 요구하는 실제 시간
-      기반 완료 판정에 필요
-- [ ] **신규**: `Model/Repository/IProductionLineRepository.h` — 큐 전체 저장/로드를 표현하는 최소
-      인터페이스 정의 (예: `SaveQueue(currentJob, waitingJobs)`, `LoadQueue()`)
-- [ ] **신규**: `Model/Repository/JsonProductionLineRepository.h/.cpp` — `data/production_queue.json`에
-      write-through로 저장. DataPersistence의 손상 파일 폴백 원칙(빈 큐로 시작, 예외를 잡아 경고 출력)을
-      동일하게 적용. **`startTime`을 포함한 큐 전체 상태의 영속화가 필수** — 이 값이 저장되지 않으면
-      앱 재시작 후 각 작업이 언제 시작됐는지 알 수 없어 실시간 정산(요구사항 4·5)이 불가능하다
-      ([CLAUDE.md](../CLAUDE.md) §3)
-- [ ] 검증: 콘솔에서 임시 `main.cpp`로 Sample/Order/ProductionLine 각각 등록 → 재실행 → 데이터 유지
-      확인 (DataPersistence PoC와 동일한 round-trip 검증)
+- [x] `Model/Repository/ISampleRepository.h`, `IOrderRepository.h` — 그대로 복사 (시그니처 변경 없음)
+- [x] `Model/Repository/JsonSampleRepository.h/.cpp`, `JsonOrderRepository.h/.cpp` — DataPersistence에서
+      그대로 복사. 파일 경로는 이 저장소의 `data/samples.json`, `data/orders.json`을 Phase 4(main.cpp
+      조립)에서 지정하기로 하고, 이 Phase에서는 생성자가 임의 경로를 받도록만 확인(테스트에서는 임시
+      디렉터리 경로 사용)
+- [x] `Json/` (JsonLib 전체, 16개 파일) — DataPersistence에서 그대로 복사 (수정 없이 소비)
+- [x] **신규**: `Model/ProductionLine.h/.cpp` — ConsoleMVC의 `ProductionJob`/`ProductionLine`을 가져오되,
+      `ProductionJob`에 `ToJson()`/`FromJson()` 추가 (필드: `orderId`, `sampleId`, `shortageQuantity`,
+      `actualQuantity`, `totalProductionTime`, **+ 신규 `startTime`**(`std::chrono::system_clock::time_point`,
+      JSON에는 `startTimeEpochMs` 정수로 직렬화)). `ProductionLine`에도 영속화를 위한 벌크 접근자
+      `GetAllJobsInOrder()`/`ReplaceAll()`을 신규 추가 (기존 `Enqueue`/`CurrentJob`/`CompleteCurrentJob`/
+      `GetWaitingJobs`는 변경 없음)
+- [x] **신규**: `Model/Repository/IProductionLineRepository.h` — `SaveQueue(jobsInOrder)`/`LoadQueue()`로
+      큐 전체(맨 앞이 Current Job)를 스냅샷 단위로 다루는 인터페이스
+- [x] **신규**: `Model/Repository/JsonProductionLineRepository.h/.cpp` — `data/production_queue.json`에
+      write-through로 저장. Sample/Order Repository와 달리 생성자에서 자동 로드하지 않고, 로드 시점은
+      호출부가 결정하도록 설계(주석에 근거 명시). 손상 파일 폴백 원칙은 DataPersistence와 동일
+- [x] **신규**: `Model/InventoryCalculator.h/.cpp` — 애초 계획에는 없었으나, 이 Phase의 "Model 계산 로직
+      테스트"(실 생산량 `ceil` 공식, 재고 상태 분류) 항목을 테스트하려면 그 계산 자체가 Model 계층의
+      순수 함수로 존재해야 한다고 판단해 추가함: `CalculateShortage`, `CalculateActualProductionQuantity`
+      (ceil, 수율 0이면 예외), `CalculateTotalProductionTime`, `ClassifyInventoryLevel`(여유/부족/고갈).
+      Phase 2에서 `OrderController`가 이 함수들을 그대로 재사용한다.
+- [x] 검증: 콘솔 임시 확인 대신, 아래 Unit Test(Repository 왕복 테스트)로 자동화하여 대체
 
-**Unit Test (이 Phase에서 바로 작성)**
-- [ ] Repository 왕복 테스트: 임시 디렉터리에 `samples.json`/`orders.json`/`production_queue.json`을
-      만들고 저장 → 재로드 → 동일성 비교 (`ProductionJob.startTime` 포함, 위 검증 항목의 자동화 버전)
-- [ ] Model 계산 로직 테스트: 실 생산량(`ceil` 공식, 수율 재적용 없이 100% 산출), 재고 상태 분류
-      (여유/부족/고갈 경계값)
+**Unit Test (이 Phase에서 바로 작성) — 20건**
+- [x] Repository 왕복 테스트: `tests/unit/JsonRepositoryRoundTripTest.cpp` — `JsonSampleRepository`/
+      `JsonOrderRepository`/`JsonProductionLineRepository` 각각 임시 파일에 저장 → 새 인스턴스로 재로드
+      → 값 동일성 확인. `ProductionJob.startTime`이 밀리초 단위까지 정확히 왕복되는지, 큐 순서(Current가
+      맨 앞)가 보존되는지도 함께 확인. `ProductionLine::ReplaceAll`/`GetAllJobsInOrder`도 함께 검증
+- [x] Model 계산 로직 테스트: `tests/unit/InventoryCalculatorTest.cpp` — `CalculateShortage`(재고
+      충분/부족/정확히 일치), `CalculateActualProductionQuantity`(ceil 공식, 나누어떨어지지 않는 경우,
+      부족분 0, 수율 0일 때 예외), `CalculateTotalProductionTime`, `ClassifyInventoryLevel`(여유/부족/
+      고갈 3구간) 검증
 
-**적대적 테스트 (이 Phase에서 바로 작성)**
-- [ ] 손상/누락된 JSON 파일: `samples.json`/`orders.json`/`production_queue.json`이 없거나 문법이
-      손상된 상태에서 각 Repository가 크래시 없이 빈 컬렉션으로 폴백하는지 검증
+**적대적 테스트 (이 Phase에서 바로 작성) — 6건**
+- [x] `tests/adversarial/JsonRepositoryFallbackTest.cpp` — `samples.json`/`orders.json`/
+      `production_queue.json`이 없거나(최초 실행) 문법이 손상된 경우, 세 Repository 모두 크래시 없이
+      빈 컬렉션으로 폴백하고, 폴백 이후에도 `Add`/`SaveQueue`로 정상 복구되는지 검증
+
+### 빌드 검증
+
+- `MSBuild.exe ... /p:PlatformToolset=v143` 빌드 성공 (경고 없음)
+- `SampleOrderSystem-Chan-0613.exe --test` 실행 → **27/27 테스트 통과**, 종료 코드 0
 
 **참고 저장소**: ConsoleMVC(도메인/인터페이스), DataPersistence(JSON 구현체/JsonLib)
 

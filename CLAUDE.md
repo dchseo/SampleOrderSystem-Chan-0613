@@ -242,8 +242,9 @@ SampleOrderSystem-Chan-0613/
 ├── Model/
 │   ├── Sample.h / .cpp
 │   ├── Order.h / .cpp                       # OrderStatus enum
-│   ├── ProductionLine.h / .cpp              # ProductionJob 포함
+│   ├── ProductionLine.h / .cpp              # ProductionJob 포함 (startTime 필드, 벌크 접근자)
 │   ├── Dtos.h                               # OrderApprovalResult, InventoryLevel 등
+│   ├── InventoryCalculator.h / .cpp         # 신규(Phase 1) — 부족분/실생산량/재고상태 순수 계산 함수
 │   └── Repository/
 │       ├── ISampleRepository.h / IOrderRepository.h / IProductionLineRepository.h
 │       └── JsonSampleRepository / JsonOrderRepository / JsonProductionLineRepository (신규)
