@@ -54,6 +54,9 @@ namespace Controller
         void PersistProductionQueue();
         int SumPendingShortageForSample(const std::string& sampleId) const;
         void ApplyProductionCompletion(const Model::ProductionJob& job);
+        // ApproveOrder/RejectOrder/ReleaseOrder가 공통으로 쓰는 "지금 이 상태여야만 유효한
+        // 전이" 조회 패턴을 추출한 헬퍼. 상태가 requiredStatus가 아니면 nullopt.
+        std::optional<Model::Order> FindOrderRequiringStatus(const std::string& orderId, Model::OrderStatus requiredStatus) const;
 
         Model::IOrderRepository& orderRepository_;
         Model::ISampleRepository& sampleRepository_;

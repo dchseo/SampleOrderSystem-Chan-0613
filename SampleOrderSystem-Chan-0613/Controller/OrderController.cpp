@@ -88,6 +88,16 @@ namespace Controller
         return orderRepository_.FindByStatus(Model::OrderStatus::Reserved);
     }
 
+    std::optional<Model::Order> OrderController::FindOrderRequiringStatus(const std::string& orderId, Model::OrderStatus requiredStatus) const
+    {
+        auto orderOpt = orderRepository_.FindById(orderId);
+        if (!orderOpt.has_value() || orderOpt->GetStatus() != requiredStatus)
+        {
+            return std::nullopt;
+        }
+        return orderOpt;
+    }
+
     Model::OrderApprovalResult OrderController::ApproveOrder(const std::string& orderId)
     {
         Model::OrderApprovalResult result;
@@ -96,8 +106,8 @@ namespace Controller
         // 그 시점까지 실제로 이미 끝났어야 할 생산을 먼저 반영해야 한다 (CLAUDE.md §1, 요구사항 6).
         SettleProductionQueue(std::chrono::system_clock::now());
 
-        auto orderOpt = orderRepository_.FindById(orderId);
-        if (!orderOpt.has_value() || orderOpt->GetStatus() != Model::OrderStatus::Reserved)
+        auto orderOpt = FindOrderRequiringStatus(orderId, Model::OrderStatus::Reserved);
+        if (!orderOpt.has_value())
         {
             result.message = "승인 가능한 주문(RESERVED)이 아닙니다.";
             return result;
@@ -167,8 +177,8 @@ namespace Controller
 
     bool OrderController::RejectOrder(const std::string& orderId)
     {
-        auto orderOpt = orderRepository_.FindById(orderId);
-        if (!orderOpt.has_value() || orderOpt->GetStatus() != Model::OrderStatus::Reserved)
+        auto orderOpt = FindOrderRequiringStatus(orderId, Model::OrderStatus::Reserved);
+        if (!orderOpt.has_value())
         {
             return false;
         }
@@ -185,8 +195,8 @@ namespace Controller
 
     bool OrderController::ReleaseOrder(const std::string& orderId)
     {
-        auto orderOpt = orderRepository_.FindById(orderId);
-        if (!orderOpt.has_value() || orderOpt->GetStatus() != Model::OrderStatus::Confirmed)
+        auto orderOpt = FindOrderRequiringStatus(orderId, Model::OrderStatus::Confirmed);
+        if (!orderOpt.has_value())
         {
             return false;
         }
