@@ -34,6 +34,11 @@ namespace Model
         ProductionJob CompleteCurrentJob();
         std::vector<ProductionJob> GetWaitingJobs() const;
 
+        // 대기하던 작업이 Current로 승격되는 시점에 실시간 정산 로직(OrderController)이
+        // 실제 시작 시각을 기록하기 위해 사용한다 (CLAUDE.md §3 — 새 Current의 StartTime은
+        // "지금"이 아니라 직전 작업의 완료 예정 시각이어야 한다).
+        void SetCurrentJobStartTime(std::chrono::system_clock::time_point startTime);
+
         // JsonProductionLineRepository의 영속화(저장/로드)를 위한 벌크 접근.
         // 순서는 큐 순서와 동일하다 (맨 앞이 Current Job).
         std::vector<ProductionJob> GetAllJobsInOrder() const;

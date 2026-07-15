@@ -161,12 +161,18 @@
     <ClCompile Include="tests\unit\FrameworkSelfTest.cpp" />
     <ClCompile Include="tests\unit\InventoryCalculatorTest.cpp" />
     <ClCompile Include="tests\unit\JsonRepositoryRoundTripTest.cpp" />
+    <ClCompile Include="tests\unit\OrderControllerScenarioTest.cpp" />
     <ClCompile Include="tests\adversarial\FrameworkSelfTest.cpp" />
     <ClCompile Include="tests\adversarial\JsonRepositoryFallbackTest.cpp" />
+    <ClCompile Include="tests\adversarial\OrderControllerAdversarialTest.cpp" />
     <ClCompile Include="Model\Sample.cpp" />
     <ClCompile Include="Model\Order.cpp" />
     <ClCompile Include="Model\ProductionLine.cpp" />
     <ClCompile Include="Model\InventoryCalculator.cpp" />
+    <ClCompile Include="Model\InventoryLevel.cpp" />
+    <ClCompile Include="Controller\SampleController.cpp" />
+    <ClCompile Include="Controller\MonitoringController.cpp" />
+    <ClCompile Include="Controller\OrderController.cpp" />
     <ClCompile Include="Model\Repository\JsonSampleRepository.cpp" />
     <ClCompile Include="Model\Repository\JsonOrderRepository.cpp" />
     <ClCompile Include="Model\Repository\JsonProductionLineRepository.cpp" />
@@ -180,11 +186,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tests\TestFramework.h" />
+    <ClInclude Include="tests\OrderControllerFixture.h" />
     <ClInclude Include="Model\Sample.h" />
     <ClInclude Include="Model\Order.h" />
     <ClInclude Include="Model\Dtos.h" />
     <ClInclude Include="Model\ProductionLine.h" />
     <ClInclude Include="Model\InventoryCalculator.h" />
+    <ClInclude Include="Model\InventoryLevel.h" />
+    <ClInclude Include="Controller\SampleController.h" />
+    <ClInclude Include="Controller\MonitoringController.h" />
+    <ClInclude Include="Controller\OrderController.h" />
     <ClInclude Include="Model\Repository\ISampleRepository.h" />
     <ClInclude Include="Model\Repository\IOrderRepository.h" />
     <ClInclude Include="Model\Repository\IProductionLineRepository.h" />

@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <string>
+#include "InventoryLevel.h"
 #include "Order.h"
 #include "Sample.h"
 
@@ -16,13 +17,6 @@ namespace Model
         int actualProductionQuantity = 0;
         double totalProductionTime = 0.0;
         std::string message;
-    };
-
-    enum class InventoryLevel
-    {
-        Sufficient, // 여유
-        Low,        // 부족
-        Depleted    // 고갈
     };
 
     struct InventoryStatusItem

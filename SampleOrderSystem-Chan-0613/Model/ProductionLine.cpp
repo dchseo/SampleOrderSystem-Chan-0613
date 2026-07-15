@@ -63,6 +63,15 @@ namespace Model
         return job;
     }
 
+    void ProductionLine::SetCurrentJobStartTime(std::chrono::system_clock::time_point startTime)
+    {
+        if (queue_.empty())
+        {
+            throw std::out_of_range("no current production job");
+        }
+        queue_.front().startTime = startTime;
+    }
+
     std::vector<ProductionJob> ProductionLine::GetWaitingJobs() const
     {
         std::vector<ProductionJob> waiting;

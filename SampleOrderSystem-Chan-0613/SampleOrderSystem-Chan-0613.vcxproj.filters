@@ -37,6 +37,9 @@
     <Filter Include="Json\src">
       <UniqueIdentifier>{d2d7b5b3-1f2e-4b4b-a04f-9f0a4c7b3c05}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Controller">
+      <UniqueIdentifier>{e3e8c6c4-2f3f-4c5c-b15f-af1b5d8c4d01}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -54,10 +57,16 @@
     <ClCompile Include="tests\unit\JsonRepositoryRoundTripTest.cpp">
       <Filter>tests\unit</Filter>
     </ClCompile>
+    <ClCompile Include="tests\unit\OrderControllerScenarioTest.cpp">
+      <Filter>tests\unit</Filter>
+    </ClCompile>
     <ClCompile Include="tests\adversarial\FrameworkSelfTest.cpp">
       <Filter>tests\adversarial</Filter>
     </ClCompile>
     <ClCompile Include="tests\adversarial\JsonRepositoryFallbackTest.cpp">
+      <Filter>tests\adversarial</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\adversarial\OrderControllerAdversarialTest.cpp">
       <Filter>tests\adversarial</Filter>
     </ClCompile>
     <ClCompile Include="Model\Sample.cpp">
@@ -71,6 +80,18 @@
     </ClCompile>
     <ClCompile Include="Model\InventoryCalculator.cpp">
       <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\InventoryLevel.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller\SampleController.cpp">
+      <Filter>Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller\MonitoringController.cpp">
+      <Filter>Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller\OrderController.cpp">
+      <Filter>Controller</Filter>
     </ClCompile>
     <ClCompile Include="Model\Repository\JsonSampleRepository.cpp">
       <Filter>Model\Repository</Filter>
@@ -107,6 +128,9 @@
     <ClInclude Include="tests\TestFramework.h">
       <Filter>tests</Filter>
     </ClInclude>
+    <ClInclude Include="tests\OrderControllerFixture.h">
+      <Filter>tests</Filter>
+    </ClInclude>
     <ClInclude Include="Model\Sample.h">
       <Filter>Model</Filter>
     </ClInclude>
@@ -121,6 +145,18 @@
     </ClInclude>
     <ClInclude Include="Model\InventoryCalculator.h">
       <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\InventoryLevel.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller\SampleController.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller\MonitoringController.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller\OrderController.h">
+      <Filter>Controller</Filter>
     </ClInclude>
     <ClInclude Include="Model\Repository\ISampleRepository.h">
       <Filter>Model\Repository</Filter>

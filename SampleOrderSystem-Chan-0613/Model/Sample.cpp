@@ -17,6 +17,8 @@ namespace Model
     double Sample::GetAvgProductionTime() const noexcept { return avgProductionTime_; }
     double Sample::GetYield() const noexcept { return yield_; }
     int Sample::GetStock() const noexcept { return stock_; }
+    InventoryLevel Sample::GetInventoryLevel() const noexcept { return inventoryLevel_; }
+    void Sample::SetInventoryLevel(InventoryLevel level) noexcept { inventoryLevel_ = level; }
 
     void Sample::IncreaseStock(int amount)
     {
@@ -49,6 +51,7 @@ namespace Model
         json.set("avgProductionTime", avgProductionTime_);
         json.set("yield", yield_);
         json.set("stock", stock_);
+        json.set("inventoryLevel", ToString(inventoryLevel_));
         return json;
     }
 
@@ -60,6 +63,11 @@ namespace Model
         sample.avgProductionTime_ = json["avgProductionTime"].asDouble();
         sample.yield_ = json["yield"].asDouble();
         sample.stock_ = static_cast<int>(json["stock"].asInt());
+        // 이전 스키마(inventoryLevel 필드 없음)로 저장된 파일도 깨지지 않고 로드되도록,
+        // 없으면 기본값(Depleted)으로 폴백한다.
+        sample.inventoryLevel_ = json.contains("inventoryLevel")
+                                      ? InventoryLevelFromString(json["inventoryLevel"].asString())
+                                      : InventoryLevel::Depleted;
         return sample;
     }
 }
