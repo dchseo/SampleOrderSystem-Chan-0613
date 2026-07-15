@@ -16,6 +16,15 @@
   함께 작성한다. 테스트 하네스(러너) 자체는 Phase 0에서 미리 준비해, 이후 Phase들이 곧바로 테스트를
   추가할 수 있게 한다. **Phase 6("테스트 회귀·정리")은 새 테스트를 처음 작성하는 단계가 아니라, 그때
   까지 각 Phase에서 쌓인 테스트를 모아 한 번에 빌드+실행하고 빠진 부분이 없는지 점검하는 단계다.**
+- **Sub-agent 활용 방침**: Phase 0~4, 6~7은 이전 Phase의 인터페이스/파일에 강하게 의존하고 동일한
+  `.vcxproj`를 계속 같이 수정하므로, 여러 sub-agent로 병렬 분산하지 않고 **메인 대화에서 Phase
+  순서대로 직접 구현**한다 (병렬화 이득보다 파일 충돌·조율 비용이 더 큼). Sub-agent는 아래 두
+  경우에만 사용한다.
+  1. **각 Phase 완료 직후 code-review 서브에이전트로 검증**: 계층 분리(Model/View/Controller 역할
+     원칙), 재고·생산 라인 처리 규칙(상세 섹션), 커밋 컨벤션 준수 여부를 그 Phase의 메인 구현과
+     독립적으로 재점검한다.
+  2. **Phase 5(DataMonitor/DummyDataGenerator 도구 이식)**: 메인 애플리케이션 로직과 파일이
+     겹치지 않는 독립적인 작업이므로, 별도 sub-agent에 위임해도 충돌 위험이 적다.
 
 ---
 
@@ -225,7 +234,7 @@
 ## Phase 5 — 보조 도구 통합 (DataMonitor / DummyDataGenerator)
 
 **목표**: 별도 PoC로 개발했던 "데이터 모니터링 Tool"과 "Dummy 데이터 생성 Tool"을 최종 시스템의 데이터와
-연결한다.
+연결한다. (진행 원칙 참고 — 메인 애플리케이션과 파일이 겹치지 않으므로 sub-agent 위임 대상 후보)
 
 - [ ] `tools/DataMonitor/` — [DataMonitor PoC](../../DataMonitor-Chan-0613)의 `View/DashboardView`,
       `main.cpp`(폴링 루프)를 이식. `kSamplesFilePath`/`kOrdersFilePath`를 본 저장소의 `data/` 경로로
