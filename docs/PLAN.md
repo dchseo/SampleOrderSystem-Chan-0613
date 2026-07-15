@@ -50,7 +50,9 @@
       인터페이스 정의 (예: `SaveQueue(currentJob, waitingJobs)`, `LoadQueue()`)
 - [ ] **신규**: `Model/Repository/JsonProductionLineRepository.h/.cpp` — `data/production_queue.json`에
       write-through로 저장. DataPersistence의 손상 파일 폴백 원칙(빈 큐로 시작, 예외를 잡아 경고 출력)을
-      동일하게 적용
+      동일하게 적용. **`startTime`을 포함한 큐 전체 상태의 영속화가 필수** — 이 값이 저장되지 않으면
+      앱 재시작 후 각 작업이 언제 시작됐는지 알 수 없어 실시간 정산(요구사항 4·5)이 불가능하다
+      ([CLAUDE.md](../CLAUDE.md) §3)
 - [ ] 검증: 콘솔에서 임시 `main.cpp`로 Sample/Order/ProductionLine 각각 등록 → 재실행 → 데이터 유지
       확인 (DataPersistence PoC와 동일한 round-trip 검증)
 
@@ -69,12 +71,18 @@
       반환하는 값은 "매 조회 시 재계산"이 아니라 "승인/생산완료 시점에 갱신된 최신 값을 그대로
       반환"하는 형태로 동작을 재확인 (§2)
 - [ ] **신규**: `Model::ProductionLine::SettleQueue(now)` (또는 동급의 정산 함수) — 실제 경과 시간
-      기준으로 완료된 작업을 FIFO 순서로 순차 처리하는 로직 (§3). 다음을 반복 수행:
+      기준으로 완료된 작업을 FIFO 순서로 순차 처리하는 로직 (§3). **별도 스레드/타이머 없이 지연
+      평가(lazy evaluation)로 구현한다** — 백그라운드에서 계속 시간을 흘려보내며 생산을 진행시키는
+      것이 아니라, 아래 트리거 시점에 호출될 때만 저장된 `StartTime`과 인자로 받은 `now`(현재
+      시각)를 비교해 이미 끝났어야 할 작업을 그 순간에 몰아서 정산한다. 앱이 꺼져 있는 동안에는
+      아무 계산도 일어나지 않는다. 다음을 반복 수행:
       1. `Current` 없고 대기열 있음 → 맨 앞 작업을 `Current`로 승격, `StartTime = now`
       2. `Current`의 완료 예정 시각(`StartTime + totalProductionTime`)이 지났음 → 완료 처리(아래
          재고 반영 로직 호출) 후 다음 작업을 `Current`로 승격, `StartTime = 직전 작업의 완료 예정
          시각` (지금이 아님 — 오프라인 기간도 실제 시간으로 반영, 요구사항 4·5)
       3. 안 지났으면 종료 (진행 중)
+      호출할 때마다 `IProductionLineRepository`를 통해 갱신된 큐 상태(`StartTime` 포함)를 즉시
+      다시 저장해, 다음 호출(다음 실행/다음 트리거) 때도 정확히 이어서 계산할 수 있게 한다.
 - [ ] `Controller/OrderController.h/.cpp` — ConsoleMVC의 시그니처를 유지하되 내부 구현을 확장:
   - `ReserveOrder`: 변경 없음 (`RESERVED` 생성)
   - `ApproveOrder`: **먼저 `SettleQueue(now)`를 호출**해 그 시점까지 이미 끝났어야 할 생산을 반영한
@@ -138,7 +146,9 @@
 - [ ] `Controller`/`View` 생성 및 메뉴 루프는 ConsoleMVC의 `main.cpp` 구조를 그대로 계승
 - [ ] UTF-8 콘솔 코드페이지 설정(`SetConsoleOutputCP`/`SetConsoleCP`) 포함
 - [ ] **앱 시작 직후, 메뉴 루프 진입 전에 `SettleQueue(now)`를 1회 호출**해 오프라인 기간 동안
-      실제 시간상 이미 끝났어야 할 생산을 즉시 반영한다(CLAUDE.md §3, 요구사항 4·5)
+      실제 시간상 이미 끝났어야 할 생산을 즉시 반영한다(CLAUDE.md §3, 요구사항 4·5). 이 호출은
+      백그라운드 프로세스를 띄우는 것이 아니라, 로드된 `production_queue.json`의 `startTime`을
+      현재 시각과 비교해 한 번에 정산하는 동기 호출이다.
 - [ ] 최초 실행(데이터 파일 없음) / 재실행(데이터 파일 존재) / **생산 중 종료 후 재시작(오프라인
       캐치업)** 세 시나리오 모두 수동 검증
 
