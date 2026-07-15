@@ -460,4 +460,4 @@ Controller 코드)
 | 4. main.cpp 조립 | ConsoleMVC, DataPersistence | 낮음 (조립 + 통합 적대적 테스트 1건) |
 | 5. 보조 도구 | DataMonitor, DummyDataGenerator | 중간 (현재 스키마로 재이식 + 별도 vcxproj 2개 신규 구성) |
 | 6. 테스트 회귀·정리 | - | 낮음 (신규 작성 없음 — 회귀 실행/커버리지 점검만) |
-| 7. 마무리 | 전체 | 낮음 |
+| 7. 마무리 | 전체 | 중간 (OOP/SOLID 트레이드오프 검토·리팩토링 1건 + README/커밋 이력 문서화) |
