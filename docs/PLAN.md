@@ -118,7 +118,7 @@
 
 ## Phase 5 — 보조 도구 통합 (DataMonitor / DummyDataGenerator)
 
-**목표**: 미션1에서 요구한 "데이터 모니터링 Tool"과 "Dummy 데이터 생성 Tool"을 최종 시스템의 데이터와
+**목표**: 별도 PoC로 개발했던 "데이터 모니터링 Tool"과 "Dummy 데이터 생성 Tool"을 최종 시스템의 데이터와
 연결한다.
 
 - [ ] `tools/DataMonitor/` — [DataMonitor PoC](../../DataMonitor-Chan-0613)의 `View/DashboardView`,
