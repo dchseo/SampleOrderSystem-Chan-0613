@@ -27,19 +27,21 @@ namespace View
         std::cout << PadRight("시료명", 18)
             << PadRight("재고", 8)
             << "상태" << '\n';
+        std::cout << SeparatorLine(30) << '\n';
 
         for (const auto& item : items)
         {
             std::string levelText;
+            const char* levelColor = Color::Reset;
             switch (item.level)
             {
-            case Model::InventoryLevel::Sufficient: levelText = "여유"; break;
-            case Model::InventoryLevel::Low: levelText = "부족"; break;
-            case Model::InventoryLevel::Depleted: levelText = "고갈"; break;
+            case Model::InventoryLevel::Sufficient: levelText = "여유"; levelColor = Color::Green; break;
+            case Model::InventoryLevel::Low: levelText = "부족"; levelColor = Color::Yellow; break;
+            case Model::InventoryLevel::Depleted: levelText = "고갈"; levelColor = Color::Red; break;
             }
             std::cout << PadRight(item.sample.GetName(), 18)
                 << PadRight(std::to_string(item.sample.GetStock()), 8)
-                << levelText << '\n';
+                << Colorize(levelText, levelColor) << '\n';
         }
     }
 }

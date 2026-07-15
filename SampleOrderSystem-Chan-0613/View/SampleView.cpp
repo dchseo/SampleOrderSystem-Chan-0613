@@ -44,6 +44,7 @@ namespace View
             << PadRight("평균생산시간", 16)
             << PadRight("수율", 8)
             << "재고" << '\n';
+        std::cout << SeparatorLine(60) << '\n';
 
         for (const auto& sample : samples)
         {

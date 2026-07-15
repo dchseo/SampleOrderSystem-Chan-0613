@@ -15,4 +15,22 @@ namespace View
     // 이 어긋남을 없앤다.
     int DisplayWidth(const std::string& text);
     std::string PadRight(const std::string& text, int displayWidth);
+
+    // 표 헤더와 데이터 행 사이에 그어 줄 구분선. width만큼 '-'를 반복한다(개행 문자 없음).
+    std::string SeparatorLine(int width);
+
+    // ANSI 컬러 코드. Windows 콘솔에서 이 코드가 실제로 색으로 렌더링되려면 콘솔 모드에
+    // ENABLE_VIRTUAL_TERMINAL_PROCESSING이 설정되어 있어야 한다(main.cpp에서 시작 시 1회
+    // 설정, tools/DataMonitor가 이미 쓰던 것과 동일한 방식).
+    namespace Color
+    {
+        constexpr const char* Reset = "\x1b[0m";
+        constexpr const char* BoldBlue = "\x1b[1;34m";
+        constexpr const char* Green = "\x1b[32m";  // 재고 여유
+        constexpr const char* Yellow = "\x1b[33m"; // 재고 부족
+        constexpr const char* Red = "\x1b[31m";    // 재고 고갈
+    }
+
+    // text를 colorCode로 감싸고 끝에 Reset을 붙여 반환한다.
+    std::string Colorize(const std::string& text, const char* colorCode);
 }

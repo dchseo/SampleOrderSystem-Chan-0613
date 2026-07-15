@@ -64,6 +64,7 @@ namespace View
             << PadRight("시료ID", 14)
             << PadRight("부족분", 10)
             << "실생산량" << '\n';
+        std::cout << SeparatorLine(56) << '\n';
 
         int order = 1;
         for (const auto& job : queue)

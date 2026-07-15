@@ -45,4 +45,14 @@ namespace View
         }
         return text + std::string(static_cast<size_t>(displayWidth - currentWidth), ' ');
     }
+
+    std::string Colorize(const std::string& text, const char* colorCode)
+    {
+        return std::string(colorCode) + text + Color::Reset;
+    }
+
+    std::string SeparatorLine(int width)
+    {
+        return std::string(static_cast<size_t>(width < 0 ? 0 : width), '-');
+    }
 }

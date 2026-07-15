@@ -53,6 +53,7 @@ namespace View
             << PadRight("시료ID", 14)
             << PadRight("고객명", 16)
             << "수량" << '\n';
+        std::cout << SeparatorLine(52) << '\n';
         for (const auto& order : orders)
         {
             std::cout << PadRight(order.GetOrderId(), 14)
@@ -111,6 +112,7 @@ namespace View
             << PadRight("시료ID", 14)
             << PadRight("고객명", 16)
             << "수량" << '\n';
+        std::cout << SeparatorLine(52) << '\n';
         for (const auto& order : orders)
         {
             std::cout << PadRight(order.GetOrderId(), 14)

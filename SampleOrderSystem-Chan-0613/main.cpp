@@ -27,6 +27,21 @@
 
 namespace
 {
+    // ANSI 컬러 코드(View::Color)가 Windows 콘솔에서 실제로 색으로 렌더링되려면 콘솔 모드에
+    // ENABLE_VIRTUAL_TERMINAL_PROCESSING을 설정해야 한다 (tools/DataMonitor가 화면 지우기에
+    // 쓰던 것과 동일한 방식). 실패해도(예: 출력이 파일로 리다이렉트된 경우) 무시하고 계속
+    // 진행한다 — 색상이 안 보일 뿐 기능에는 영향이 없다.
+    void EnableAnsiColors()
+    {
+        const HANDLE outHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+        DWORD mode = 0;
+        if (GetConsoleMode(outHandle, &mode))
+        {
+            SetConsoleMode(outHandle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+        }
+    }
+
+
     // 실행 파일의 작업 디렉터리를 기준으로 한 상대 경로 — Visual Studio 디버거는 기본적으로
     // 프로젝트 폴더를 작업 디렉터리로 사용하므로, 이 폴더의 data/ 하위에 그대로 생성/갱신된다.
     constexpr const char* kDataDirectory = "data";
@@ -269,6 +284,7 @@ int main(int argc, char** argv)
 {
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
+    EnableAnsiColors();
 
     if (argc > 1 && std::string(argv[1]) == "--test")
     {
