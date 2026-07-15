@@ -75,6 +75,9 @@
     <ClCompile Include="tests\adversarial\MainMenuViewAdversarialTest.cpp">
       <Filter>tests\adversarial</Filter>
     </ClCompile>
+    <ClCompile Include="tests\adversarial\ApplicationStartupAdversarialTest.cpp">
+      <Filter>tests\adversarial</Filter>
+    </ClCompile>
     <ClCompile Include="Model\Sample.cpp">
       <Filter>Model</Filter>
     </ClCompile>

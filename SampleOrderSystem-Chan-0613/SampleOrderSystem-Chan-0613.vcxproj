@@ -166,6 +166,7 @@
     <ClCompile Include="tests\adversarial\JsonRepositoryFallbackTest.cpp" />
     <ClCompile Include="tests\adversarial\OrderControllerAdversarialTest.cpp" />
     <ClCompile Include="tests\adversarial\MainMenuViewAdversarialTest.cpp" />
+    <ClCompile Include="tests\adversarial\ApplicationStartupAdversarialTest.cpp" />
     <ClCompile Include="Model\Sample.cpp" />
     <ClCompile Include="Model\Order.cpp" />
     <ClCompile Include="Model\ProductionLine.cpp" />
