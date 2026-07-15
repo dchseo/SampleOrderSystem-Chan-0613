@@ -30,13 +30,15 @@ namespace Model
 
     InventoryLevel ClassifyInventoryLevel(int stock, int referenceQuantity)
     {
-        if (stock >= referenceQuantity)
-        {
-            return InventoryLevel::Sufficient;
-        }
+        // PDF 명세상 "고갈"은 기준 수량과 무관하게 재고 자체가 0인 상태를 뜻하므로,
+        // 다른 판정보다 항상 우선한다.
         if (stock <= 0)
         {
             return InventoryLevel::Depleted;
+        }
+        if (stock >= referenceQuantity)
+        {
+            return InventoryLevel::Sufficient;
         }
         return InventoryLevel::Low;
     }
