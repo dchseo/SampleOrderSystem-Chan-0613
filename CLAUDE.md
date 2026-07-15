@@ -281,8 +281,8 @@ SampleOrderSystem-Chan-0613/
 │   │                                         # TEST(suite, name), ASSERT_TRUE/EQ/THROWS 매크로 제공
 │   ├── unit/                                 # Unit Test (Phase별로 그 자리에서 추가, PLAN.md 참고)
 │   └── adversarial/                          # 적대적 테스트 (Phase별로 그 자리에서 추가)
-├── main.cpp                                 # Phase 0~3: 임시 진입점("--test"로 테스트 실행) →
-│                                             # Phase 4: Json Repository 구현체 조립(DI)으로 교체
+├── main.cpp                                 # Json Repository 구현체 조립(DI) + 메뉴 루프 (Phase 4)
+│                                             # "--test" 인자로 테스트 실행 분기는 Phase 0부터 유지
 └── docs/
     ├── PRD.md
     └── PLAN.md

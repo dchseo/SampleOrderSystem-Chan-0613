@@ -249,26 +249,55 @@
 
 ---
 
-## Phase 4 — main.cpp 조립 (DI)
+## Phase 4 — main.cpp 조립 (DI) ✅ 완료
 
 **목표**: In-Memory 대신 Json* Repository 구현체로 전체 시스템을 조립한다.
 
-- [ ] `main.cpp`에서 `JsonSampleRepository`, `JsonOrderRepository`, `JsonProductionLineRepository` 생성
-      (경로: `data/samples.json`, `data/orders.json`, `data/production_queue.json`)
-- [ ] `Controller`/`View` 생성 및 메뉴 루프는 ConsoleMVC의 `main.cpp` 구조를 그대로 계승
-- [ ] UTF-8 콘솔 코드페이지 설정(`SetConsoleOutputCP`/`SetConsoleCP`) 포함
-- [ ] **앱 시작 직후, 메뉴 루프 진입 전에 `SettleQueue(now)`를 1회 호출**해 오프라인 기간 동안
-      실제 시간상 이미 끝났어야 할 생산을 즉시 반영한다(CLAUDE.md §3, 요구사항 4·5). 이 호출은
-      백그라운드 프로세스를 띄우는 것이 아니라, 로드된 `production_queue.json`의 `startTime`을
-      현재 시각과 비교해 한 번에 정산하는 동기 호출이다.
-- [ ] 최초 실행(데이터 파일 없음) / 재실행(데이터 파일 존재) / **생산 중 종료 후 재시작(오프라인
-      캐치업)** 세 시나리오 모두 수동 검증
+- [x] `main.cpp`에서 `JsonSampleRepository`, `JsonOrderRepository`, `JsonProductionLineRepository` 생성
+      (경로: `data/samples.json`, `data/orders.json`, `data/production_queue.json`, 실행 파일의 작업
+      디렉터리 기준 상대 경로 — VS 디버거는 기본적으로 프로젝트 폴더를 작업 디렉터리로 사용)
+- [x] `Controller`/`View` 생성 및 메뉴 루프는 ConsoleMVC의 `main.cpp` 구조를 그대로 계승(함수 분리:
+      `RunSampleManagement`/`RunOrderReservation`/`RunOrderApproval`/`RunMonitoring`/
+      `RunProductionLine`/`RunReleaseProcessing`). `OrderController` 생성자 인자와
+      `MainMenuView::ShowMenu(summary)`/`ProductionLineView::ShowCurrentProduction(job, now)`
+      시그니처 변경(Phase 2·3)에 맞춰 호출부를 갱신
+- [x] UTF-8 콘솔 코드페이지 설정(`SetConsoleOutputCP`/`SetConsoleCP`) 포함 (Phase 0부터 유지)
+- [x] **앱 시작 직후, 메뉴 루프 진입 전에 `SettleProductionQueue(now)`를 1회 호출**. `--test` 분기는
+      Phase 0부터 있던 그대로 유지
+- [x] 최초 실행(데이터 파일 없음) / 재실행(데이터 파일 존재) / **생산 중 종료 후 재시작(오프라인
+      캐치업)** 세 시나리오 모두 실제 콘솔 입출력으로 수동 검증 (아래 "수동 검증 결과" 참고)
 
-**적대적 테스트 (이 Phase에서 바로 작성)**
-- [ ] 손상/누락된 영속 데이터로 전체 앱 기동: `data/samples.json`/`orders.json`/
-      `production_queue.json` 중 일부 또는 전부가 없거나 손상된 상태로 조립된 앱(`main.cpp` 경로)을
-      시작했을 때, 개별 Repository 단위 테스트(Phase 1)와 별개로 **조립된 전체 시스템**이 크래시
-      없이 정상 메뉴까지 도달하는지 검증
+**적대적 테스트 (이 Phase에서 바로 작성) — `tests/adversarial/ApplicationStartupAdversarialTest.cpp`, 1건**
+- [x] 손상/누락된 영속 데이터로 전체 앱 기동: `samples.json`(손상)/`orders.json`(중간에 잘림)/
+      `production_queue.json`(파일 없음)을 동시에 흉내 내, `main.cpp::RunApplication()`과 동일한
+      조립 절차(Repository 생성 → ProductionLine 로드 → Controller 생성 → 초기
+      `SettleProductionQueue`)를 그대로 재현했을 때 크래시 없이 빈 상태로 기동되고, 이후 정상
+      등록까지 가능한지 검증
+
+### 수동 검증 결과
+
+`MSBuild.exe .../SampleOrderSystem-Chan-0613.slnx /p:PlatformToolset=v143`로 빌드한 실행 파일에
+스크립트 입력을 파일로 리다이렉션(`exe.exe < input.txt`)해 실제 콘솔 입출력으로 검증했다.
+
+- **최초 실행**: 데이터 파일이 없는 상태에서 시료 등록 → 주문 접수 → 승인(재고 부족 → `PRODUCING`,
+  부족분 100/실생산량 200/총생산시간 2분 계산 정확) → 생산 라인 조회(진행률 0%, 완료 예정 시각
+  표시)까지 정상 동작. `data/samples.json`/`orders.json`/`production_queue.json`이 예상한 스키마
+  그대로 생성됨(직접 파일 내용 확인)
+- **재실행**: 위에서 생성된 데이터로 다시 실행 → 모니터링(상태별 건수, 재고 현황)과 시료 목록에서
+  이전 데이터가 그대로 유지·표시됨을 확인
+- **오프라인 캐치업**: `production_queue.json`의 `startTimeEpochMs`를 1시간 전으로 수동 조작(2분짜리
+  작업) 후 재실행 → **메뉴 진입 전 요약 정보에서 이미** "총 재고 100 ea, 생산라인 0건 대기"로 표시되어
+  앱 시작 시점의 `SettleProductionQueue` 호출이 정상 동작함을 확인. 모니터링에서 주문 상태
+  `PRODUCING → CONFIRMED`, 재고 상태 `고갈 → 여유` 전이도 함께 확인
+- **참고**: 최초 시도에서 PowerShell 파이프(`Get-Content -Raw | & exe`)로 입력을 넣었을 때 첫 메뉴
+  선택이 항상 `Invalid`로 잘못 판정되는 현상이 있었으나, 파일 리다이렉션(`cmd /c "exe < file"`)으로
+  재현한 결과 앱은 정상 동작했다 — **애플리케이션 코드의 결함이 아니라 PowerShell 파이프의 stdin
+  전달 방식 차이였음**을 확인하고 별도 수정 없이 검증 방법만 바꿔 진행함
+
+### 빌드 검증
+
+- `MSBuild.exe ... /p:PlatformToolset=v143` 빌드 성공 (경고 없음)
+- `SampleOrderSystem-Chan-0613.exe --test` 실행 → **55/55 테스트 통과**, 종료 코드 0
 
 **참고 저장소**: ConsoleMVC(main.cpp 구조), DataPersistence(Repository 생성자 패턴)
 
