@@ -50,14 +50,14 @@ namespace View
             return;
         }
         std::cout << std::left
-            << std::setw(12) << "주문번호"
+            << std::setw(16) << "주문번호"
             << std::setw(16) << "시료ID"
             << std::setw(16) << "고객명"
             << std::setw(8) << "수량" << '\n';
         for (const auto& order : orders)
         {
             std::cout << std::left
-                << std::setw(12) << order.GetOrderId()
+                << std::setw(16) << order.GetOrderId()
                 << std::setw(16) << order.GetSampleId()
                 << std::setw(16) << order.GetCustomerName()
                 << std::setw(8) << order.GetQuantity() << '\n';
@@ -110,14 +110,14 @@ namespace View
             return;
         }
         std::cout << std::left
-            << std::setw(12) << "주문번호"
+            << std::setw(16) << "주문번호"
             << std::setw(16) << "시료ID"
             << std::setw(16) << "고객명"
             << std::setw(8) << "수량" << '\n';
         for (const auto& order : orders)
         {
             std::cout << std::left
-                << std::setw(12) << order.GetOrderId()
+                << std::setw(16) << order.GetOrderId()
                 << std::setw(16) << order.GetSampleId()
                 << std::setw(16) << order.GetCustomerName()
                 << std::setw(8) << order.GetQuantity() << '\n';

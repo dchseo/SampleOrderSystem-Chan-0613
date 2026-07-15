@@ -59,8 +59,8 @@ namespace View
             return;
         }
         std::cout << std::left
-            << std::setw(6) << "순서"
-            << std::setw(12) << "주문번호"
+            << std::setw(10) << "순서"
+            << std::setw(16) << "주문번호"
             << std::setw(16) << "시료ID"
             << std::setw(10) << "부족분"
             << std::setw(10) << "실생산량" << '\n';
@@ -69,8 +69,8 @@ namespace View
         for (const auto& job : queue)
         {
             std::cout << std::left
-                << std::setw(6) << order++
-                << std::setw(12) << job.orderId
+                << std::setw(10) << order++
+                << std::setw(16) << job.orderId
                 << std::setw(16) << job.sampleId
                 << std::setw(10) << job.shortageQuantity
                 << std::setw(10) << job.actualQuantity << '\n';

@@ -41,7 +41,7 @@ namespace View
         std::cout << std::left
             << std::setw(10) << "ID"
             << std::setw(20) << "시료명"
-            << std::setw(16) << "평균생산시간"
+            << std::setw(22) << "평균생산시간"
             << std::setw(8) << "수율"
             << std::setw(10) << "재고" << '\n';
 
@@ -50,7 +50,7 @@ namespace View
             std::cout << std::left
                 << std::setw(10) << sample.GetSampleId()
                 << std::setw(20) << sample.GetName()
-                << std::setw(16) << sample.GetAvgProductionTime()
+                << std::setw(22) << sample.GetAvgProductionTime()
                 << std::setw(8) << sample.GetYield()
                 << std::setw(10) << sample.GetStock() << '\n';
         }
