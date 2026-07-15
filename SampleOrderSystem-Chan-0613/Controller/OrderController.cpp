@@ -27,12 +27,6 @@ namespace Controller
             }
         }
 
-        // totalProductionTime(분, double)을 system_clock::duration으로 변환한다.
-        std::chrono::system_clock::duration MinutesToDuration(double minutes)
-        {
-            return std::chrono::duration_cast<std::chrono::system_clock::duration>(
-                std::chrono::duration<double, std::ratio<60>>(minutes));
-        }
     }
 
     OrderController::OrderController(Model::IOrderRepository& orderRepository,
@@ -255,7 +249,7 @@ namespace Controller
         while (productionLine_.HasCurrentJob())
         {
             const Model::ProductionJob current = productionLine_.CurrentJob();
-            const auto completionTime = current.startTime + MinutesToDuration(current.totalProductionTime);
+            const auto completionTime = current.CompletionTime();
 
             if (now < completionTime)
             {

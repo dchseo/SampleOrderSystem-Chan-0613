@@ -26,4 +26,14 @@ namespace Model
     };
 
     using OrderStatusSummary = std::map<OrderStatus, int>;
+
+    // 메인 메뉴 상단에 표시하는 전체 시료 요약 정보 (PDF 예시 UI 참고). MonitoringController가
+    // 계산해 View에 그대로 전달한다 — View는 렌더링만 담당한다.
+    struct MainMenuSummary
+    {
+        int registeredSampleCount = 0;
+        int totalStock = 0;
+        int totalOrderCount = 0;
+        int productionQueueCount = 0; // 현재 생산 중 + 대기 중인 작업 수 합계
+    };
 }

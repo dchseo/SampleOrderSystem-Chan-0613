@@ -3,6 +3,12 @@
 
 namespace Model
 {
+    std::chrono::system_clock::time_point ProductionJob::CompletionTime() const
+    {
+        return startTime + std::chrono::duration_cast<std::chrono::system_clock::duration>(
+            std::chrono::duration<double, std::ratio<60>>(totalProductionTime));
+    }
+
     json::JsonValue ProductionJob::ToJson() const
     {
         auto json = json::JsonValue::makeObject();

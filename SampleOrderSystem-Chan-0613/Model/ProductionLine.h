@@ -19,6 +19,10 @@ namespace Model
         double totalProductionTime = 0.0; // 평균 생산시간 * 실 생산량 (분)
         std::chrono::system_clock::time_point startTime{};
 
+        // 완료 예정 시각 = startTime + totalProductionTime(분). 실시간 정산(Controller)과
+        // 진행률 표시(View)가 공통으로 쓰는 계산이라 여기 한 곳에만 둔다.
+        std::chrono::system_clock::time_point CompletionTime() const;
+
         // JSON 직렬화 편의 메서드. startTime은 epoch 밀리초 정수로 저장한다.
         json::JsonValue ToJson() const;
         static ProductionJob FromJson(const json::JsonValue& json);

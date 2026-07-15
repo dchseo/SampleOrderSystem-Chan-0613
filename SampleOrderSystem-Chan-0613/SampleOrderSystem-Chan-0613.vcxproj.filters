@@ -40,6 +40,9 @@
     <Filter Include="Controller">
       <UniqueIdentifier>{e3e8c6c4-2f3f-4c5c-b15f-af1b5d8c4d01}</UniqueIdentifier>
     </Filter>
+    <Filter Include="View">
+      <UniqueIdentifier>{f4f9d7d5-3040-4d6d-c260-c02c6e9d5e01}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -69,6 +72,9 @@
     <ClCompile Include="tests\adversarial\OrderControllerAdversarialTest.cpp">
       <Filter>tests\adversarial</Filter>
     </ClCompile>
+    <ClCompile Include="tests\adversarial\MainMenuViewAdversarialTest.cpp">
+      <Filter>tests\adversarial</Filter>
+    </ClCompile>
     <ClCompile Include="Model\Sample.cpp">
       <Filter>Model</Filter>
     </ClCompile>
@@ -92,6 +98,21 @@
     </ClCompile>
     <ClCompile Include="Controller\OrderController.cpp">
       <Filter>Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="View\MainMenuView.cpp">
+      <Filter>View</Filter>
+    </ClCompile>
+    <ClCompile Include="View\SampleView.cpp">
+      <Filter>View</Filter>
+    </ClCompile>
+    <ClCompile Include="View\OrderView.cpp">
+      <Filter>View</Filter>
+    </ClCompile>
+    <ClCompile Include="View\MonitoringView.cpp">
+      <Filter>View</Filter>
+    </ClCompile>
+    <ClCompile Include="View\ProductionLineView.cpp">
+      <Filter>View</Filter>
     </ClCompile>
     <ClCompile Include="Model\Repository\JsonSampleRepository.cpp">
       <Filter>Model\Repository</Filter>
@@ -157,6 +178,21 @@
     </ClInclude>
     <ClInclude Include="Controller\OrderController.h">
       <Filter>Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="View\MainMenuView.h">
+      <Filter>View</Filter>
+    </ClInclude>
+    <ClInclude Include="View\SampleView.h">
+      <Filter>View</Filter>
+    </ClInclude>
+    <ClInclude Include="View\OrderView.h">
+      <Filter>View</Filter>
+    </ClInclude>
+    <ClInclude Include="View\MonitoringView.h">
+      <Filter>View</Filter>
+    </ClInclude>
+    <ClInclude Include="View\ProductionLineView.h">
+      <Filter>View</Filter>
     </ClInclude>
     <ClInclude Include="Model\Repository\ISampleRepository.h">
       <Filter>Model\Repository</Filter>

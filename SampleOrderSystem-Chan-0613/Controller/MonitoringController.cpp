@@ -37,4 +37,21 @@ namespace Controller
         }
         return items;
     }
+
+    Model::MainMenuSummary MonitoringController::GetMainMenuSummary(const Model::ProductionLine& productionLine) const
+    {
+        Model::MainMenuSummary summary;
+
+        const auto samples = sampleRepository_.GetAll();
+        summary.registeredSampleCount = static_cast<int>(samples.size());
+        for (const auto& sample : samples)
+        {
+            summary.totalStock += sample.GetStock();
+        }
+
+        summary.totalOrderCount = static_cast<int>(orderRepository_.GetAll().size());
+        summary.productionQueueCount = static_cast<int>(productionLine.GetAllJobsInOrder().size());
+
+        return summary;
+    }
 }

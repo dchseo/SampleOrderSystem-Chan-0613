@@ -165,6 +165,7 @@
     <ClCompile Include="tests\adversarial\FrameworkSelfTest.cpp" />
     <ClCompile Include="tests\adversarial\JsonRepositoryFallbackTest.cpp" />
     <ClCompile Include="tests\adversarial\OrderControllerAdversarialTest.cpp" />
+    <ClCompile Include="tests\adversarial\MainMenuViewAdversarialTest.cpp" />
     <ClCompile Include="Model\Sample.cpp" />
     <ClCompile Include="Model\Order.cpp" />
     <ClCompile Include="Model\ProductionLine.cpp" />
@@ -173,6 +174,11 @@
     <ClCompile Include="Controller\SampleController.cpp" />
     <ClCompile Include="Controller\MonitoringController.cpp" />
     <ClCompile Include="Controller\OrderController.cpp" />
+    <ClCompile Include="View\MainMenuView.cpp" />
+    <ClCompile Include="View\SampleView.cpp" />
+    <ClCompile Include="View\OrderView.cpp" />
+    <ClCompile Include="View\MonitoringView.cpp" />
+    <ClCompile Include="View\ProductionLineView.cpp" />
     <ClCompile Include="Model\Repository\JsonSampleRepository.cpp" />
     <ClCompile Include="Model\Repository\JsonOrderRepository.cpp" />
     <ClCompile Include="Model\Repository\JsonProductionLineRepository.cpp" />
@@ -196,6 +202,11 @@
     <ClInclude Include="Controller\SampleController.h" />
     <ClInclude Include="Controller\MonitoringController.h" />
     <ClInclude Include="Controller\OrderController.h" />
+    <ClInclude Include="View\MainMenuView.h" />
+    <ClInclude Include="View\SampleView.h" />
+    <ClInclude Include="View\OrderView.h" />
+    <ClInclude Include="View\MonitoringView.h" />
+    <ClInclude Include="View\ProductionLineView.h" />
     <ClInclude Include="Model\Repository\ISampleRepository.h" />
     <ClInclude Include="Model\Repository\IOrderRepository.h" />
     <ClInclude Include="Model\Repository\IProductionLineRepository.h" />
