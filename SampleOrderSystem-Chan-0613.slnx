@@ -4,4 +4,6 @@
     <Platform Name="x86" />
   </Configurations>
   <Project Path="SampleOrderSystem-Chan-0613/SampleOrderSystem-Chan-0613.vcxproj" />
+  <Project Path="SampleOrderSystem-Chan-0613/tools/DataMonitor/DataMonitor.vcxproj" />
+  <Project Path="SampleOrderSystem-Chan-0613/tools/DummyDataGenerator/DummyDataGenerator.vcxproj" />
 </Solution>

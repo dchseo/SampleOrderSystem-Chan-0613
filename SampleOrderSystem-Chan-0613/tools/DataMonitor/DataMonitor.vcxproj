@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>18.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{C2206F86-4428-4D84-B16B-08F1D2810134}</ProjectGuid>
+    <RootNamespace>DataMonitor</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
+      <AdditionalIncludeDirectories>$(ProjectDir)Json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
+      <AdditionalIncludeDirectories>$(ProjectDir)Json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="View\DashboardView.cpp" />
+    <ClCompile Include="Model\Sample.cpp" />
+    <ClCompile Include="Model\Order.cpp" />
+    <ClCompile Include="Model\InventoryLevel.cpp" />
+    <ClCompile Include="Model\ProductionLine.cpp" />
+    <ClCompile Include="Model\Repository\JsonSampleRepository.cpp" />
+    <ClCompile Include="Model\Repository\JsonOrderRepository.cpp" />
+    <ClCompile Include="Model\Repository\JsonProductionLineRepository.cpp" />
+    <ClCompile Include="Controller\MonitoringController.cpp" />
+    <ClCompile Include="Json\src\JsonDocument.cpp" />
+    <ClCompile Include="Json\src\JsonLexer.cpp" />
+    <ClCompile Include="Json\src\JsonParser.cpp" />
+    <ClCompile Include="Json\src\JsonPointer.cpp" />
+    <ClCompile Include="Json\src\JsonUtils.cpp" />
+    <ClCompile Include="Json\src\JsonValue.cpp" />
+    <ClCompile Include="Json\src\JsonWriter.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="View\DashboardView.h" />
+    <ClInclude Include="Model\Sample.h" />
+    <ClInclude Include="Model\Order.h" />
+    <ClInclude Include="Model\InventoryLevel.h" />
+    <ClInclude Include="Model\ProductionLine.h" />
+    <ClInclude Include="Model\Dtos.h" />
+    <ClInclude Include="Model\Repository\ISampleRepository.h" />
+    <ClInclude Include="Model\Repository\IOrderRepository.h" />
+    <ClInclude Include="Model\Repository\IProductionLineRepository.h" />
+    <ClInclude Include="Model\Repository\JsonSampleRepository.h" />
+    <ClInclude Include="Model\Repository\JsonOrderRepository.h" />
+    <ClInclude Include="Model\Repository\JsonProductionLineRepository.h" />
+    <ClInclude Include="Controller\MonitoringController.h" />
+    <ClInclude Include="Json\include\json\JsonDocument.h" />
+    <ClInclude Include="Json\include\json\JsonException.h" />
+    <ClInclude Include="Json\include\json\JsonLexer.h" />
+    <ClInclude Include="Json\include\json\JsonParser.h" />
+    <ClInclude Include="Json\include\json\JsonPointer.h" />
+    <ClInclude Include="Json\include\json\JsonType.h" />
+    <ClInclude Include="Json\include\json\JsonUtils.h" />
+    <ClInclude Include="Json\include\json\JsonValue.h" />
+    <ClInclude Include="Json\include\json\JsonWriter.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
