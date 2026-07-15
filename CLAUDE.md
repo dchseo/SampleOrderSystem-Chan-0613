@@ -1,0 +1,171 @@
+# SampleOrderSystem-Chan-0613
+
+## 프로젝트 목적
+
+가상의 반도체 회사 "S-Semi"를 위한 **반도체 시료 생산주문관리 시스템** 최종 프로젝트.
+엑셀/메모장으로 주문을 관리하며 발생하던 문제(주문 처리 여부 불명, 공정 완료 시점 불명, 불필요한
+추가 공정)를 해소하기 위해, 시료 등록 → 주문 접수 → 승인/거절 → (필요시) 생산 → 출고까지의 전
+흐름을 콘솔 기반 시스템으로 관리한다.
+
+이 저장소는 앞서 완료한 4개 PoC(Proof of Concept) 저장소의 산출물을 **그대로 계승·통합**하여
+기능 명세의 세부 로직을 완성하는 최종본이다.
+
+```
+ConsoleMVC        → 계층 구조 / 인터페이스 확정
+DataPersistence    → Repository 인터페이스의 실제 구현체를 JSON 파일 기반으로 제공
+DataMonitor        → Model(Repository)을 읽어 콘솔에 실시간 표시
+DummyDataGenerator → Repository에 테스트 데이터 주입
+SampleOrderSystem  → 위 4가지를 조립한 최종본, 기능 명세의 세부 로직을 완성        (본 저장소)
+```
+
+| PoC 항목 | 저장소 | 이 저장소에서의 역할 |
+|---|---|---|
+| MVC 스켈레톤 코드 | [ConsoleMVC-Chan-0613](../ConsoleMVC-Chan-0613) | Model/View/Controller 구조, Repository 인터페이스, 상태 전이·계산 규칙을 그대로 계승 |
+| 데이터 영속성 처리 (JSON) | [DataPersistence-Chan-0613](../DataPersistence-Chan-0613) | `JsonSampleRepository`/`JsonOrderRepository`, `JsonLib`을 변경 없이 그대로 이식 |
+| 데이터 모니터링 Tool | [DataMonitor-Chan-0613](../DataMonitor-Chan-0613) | 실시간 폴링 대시보드를 별도 실행 파일로 이식, `data/` 경로만 본 시스템 것으로 맞춤 |
+| Dummy 데이터 생성 Tool | [DummyDataGenerator-Chan-0613](../DummyDataGenerator-Chan-0613) | `Generator/` 계층을 별도 실행 파일로 이식, 동일한 `data/` 폴더에 시딩 |
+| 반도체 시료 생산주문관리 시스템 | **SampleOrderSystem-Chan-0613 (본 저장소)** | 위 4가지의 통합 + 미완결 로직(생산 라인 영속화, 재고 반영, 출고) 완성 |
+
+## 반드시 지켜야 하는 사항 (과제 명세 기준)
+
+### 과제 진행 규칙
+- **모델은 안내된 모델만 사용한다 (Sonnet / Effort: Medium)**. Opus 사용 이력이 있거나 모델 사용 이력이
+  없으면 부정행위로 간주되므로, 세션 전반에 걸쳐 이 설정을 유지한다.
+- 과제 종료 시 Claude Code에서 `/logout`으로 로그아웃한다.
+
+### 시스템 규칙 (기능 명세)
+- **콘솔 기반 애플리케이션**이며, 담당자가 메뉴 번호로 직접 명령을 입력하는 방식으로 동작한다.
+- **생산 라인**: 시료를 하나씩 생산하는 단일 설비 흐름이며, **주문이 들어온 시료에 대해서만** 생산한다.
+  생산 큐는 **FIFO(선입선출)** 로 처리한다.
+- **주문 상태 전이**는 아래 흐름을 반드시 따른다.
+  - `RESERVED`(주문 접수) → 승인 시 재고 비교
+    - 재고 충분 → `CONFIRMED`(출고 대기)
+    - 재고 부족 → `PRODUCING`(생산 라인 등록, 부족분만 생산) → 생산 완료 시 `CONFIRMED`로 전환
+  - `CONFIRMED` → 출고 처리 → `RELEASED`(출고 완료, 명세서 표기는 "RELEASE"이나 문법상 과거분사
+    `RELEASED`를 상태 이름으로 사용 — ConsoleMVC PoC에서 확정한 표기를 그대로 계승)
+  - 거절 시 즉시 `REJECTED`로 전환. **`REJECTED`는 정상 흐름 밖의 상태이며 모니터링 집계에서 제외**한다.
+- **생산량 계산 규칙**은 반드시 아래 공식을 그대로 사용한다.
+  - 부족분 = 주문 수량 − 현재 재고
+  - 실 생산량 = `ceil(부족분 / 수율)`
+  - 총 생산 시간 = 평균 생산시간 × 실 생산량
+  - 수율 = 정상 시료 수 / 총 생산 시료 수 (0~1)
+- **재고 상태 분류**: 여유(충분) / 부족(주문대비 재고 부족) / 고갈(재고 0) 3단계로 표기한다.
+- **메인 메뉴 5종 + 종료**를 모두 제공한다: 시료 관리(등록/조회/검색), 시료 주문(예약), 주문
+  승인/거절, 모니터링(주문량/재고량), 생산 라인 조회, 출고 처리. 화면 구성 자체는 자유롭게 결정한다.
+- **시스템에 등록된 시료만 주문 가능**하다 (존재하지 않는 `SampleId`로 주문 생성 불가).
+
+### PoC 미션(미션1) 4종의 요구사항 — 최종 시스템에도 동일하게 적용
+- **MVC 스켈레톤**: Model/Controller/View 패키지 구조와 역할 분리가 유지되어야 한다.
+- **데이터 영속성**: 애플리케이션을 다시 실행해도 데이터가 유지되어야 하며(JSON 파일 방식), CRUD를
+  포함해야 한다. PoC 단계에서 미완결이었던 **생산 라인(ProductionLine) 큐도 영속화 대상에 포함**한다
+  (아래 "PoC 대비 이 저장소에서 새로 메워야 하는 갭" 참고).
+- **데이터 모니터링 Tool**: 저장된 데이터 상태를 콘솔에서 실시간 조회할 수 있는 관리자 도구를 제공한다
+  (DataMonitor PoC를 이식).
+- **Dummy 데이터 생성 Tool**: 테스트용 더미 데이터를 생성해 연결된 저장소(JSON 파일)에 실제로
+  추가하는 도구를 제공한다 (DummyDataGenerator PoC를 이식).
+
+### 미션2(프로젝트 개발) 평가 주안점 — 작업 전반에서 지속적으로 반영
+1. **문서 관리**: `CLAUDE.md`, `docs/PRD.md` 등 설계·의사결정 문서를 최신 상태로 유지한다.
+2. **Harness 도입**: 자동화된 빌드/테스트/검증 체계를 마련한다.
+3. **Test**: Model 계산 로직, 상태 전이, Repository 왕복(round-trip)을 검증하는 테스트를 작성한다.
+4. **CleanCode**: 계층 간 책임 분리(Model은 콘솔 I/O 금지, View는 로직 금지 등) 원칙을 유지한다.
+5. **Commit 이력**: 작업 단위로 의미 있는 커밋을 남긴다.
+6. **Repository는 Public으로 생성**하고, 이름은 `SampleOrderSystem-Chan-0613` 규칙을 따른다(이미 반영됨).
+
+## 상위 설계 계승 — 변경 없이 그대로 재사용하는 것
+
+- **도메인 모델**: `Model::Sample` (`SampleId`, `Name`, `AvgProductionTime`, `Yield`, `Stock`),
+  `Model::Order` (`OrderId`, `SampleId`, `CustomerName`, `Quantity`, `OrderStatus`),
+  `Model::ProductionLine`/`ProductionJob` (ConsoleMVC 확정, DataPersistence의 `ToJson`/`FromJson` 포함)
+- **Repository 인터페이스**: `Model::ISampleRepository`, `Model::IOrderRepository`
+  (`Add`/`Update`/`FindById`/`FindByNameContains`|`FindByStatus`/`GetAll`)
+- **Repository 구현체**: `Model::JsonSampleRepository`, `Model::JsonOrderRepository` (DataPersistence
+  완성본, write-through 저장, 손상/부재 파일에 대한 폴백 포함) — 한 줄도 수정하지 않고 그대로 이식한다.
+- **JSON 라이브러리**: `Json/`(JsonLib) — Poc_JSON → DataPersistence → DataMonitor/DummyDataGenerator를
+  거쳐 검증된 상태로 그대로 이식한다.
+- **Controller**: `SampleController`, `OrderController`, `MonitoringController` — 시그니처와 상태 전이
+  로직은 ConsoleMVC 확정본을 그대로 따르되, 아래 갭을 메우기 위해 `OrderController`는 확장한다.
+- **필드 ↔ JSON 키 매핑(camelCase), 파일 단위 규약**: `data/samples.json`, `data/orders.json`
+  (DataPersistence와 동일)
+
+## PoC 대비 이 저장소에서 새로 메워야 하는 갭
+
+4개 PoC는 각자의 스코프 안에서 의도적으로 다음을 다루지 않았다. 최종 시스템은 기능 명세를
+완전히 충족해야 하므로, 아래 항목을 이 저장소에서 새로 구현한다.
+
+1. **생산 라인(ProductionLine)의 JSON 영속화** — DataPersistence/DataMonitor/DummyDataGenerator
+   CLAUDE.md에 공통으로 명시된 대로, `ProductionLine`(생산 큐)은 지금까지 In-Memory에만 존재했다.
+   이 저장소에서는 `IProductionLineRepository` 인터페이스와 `JsonProductionLineRepository` 구현체를
+   신규로 추가하여 `data/production_queue.json`에 큐 상태(대기 중인 `ProductionJob` 목록, 현재 처리
+   중인 작업)를 저장한다. 파일 구조/저장 시점(write-through) 원칙은 DataPersistence의 기존 규약을
+   그대로 따른다.
+2. **재고 반영 로직의 완성** — ConsoleMVC PoC는 상태 전이 골격만 갖추고 있었다. 최종본에서는
+   `OrderController`가 다음을 명시적으로 처리해야 한다.
+   - 승인 시 재고 충분 → 즉시 해당 수량만큼 `Sample.Stock` 차감 후 `CONFIRMED`.
+   - 승인 시 재고 부족 → 가용 재고 전량 차감(0으로) 후 부족분을 생산 큐에 등록, `PRODUCING`.
+   - 생산 완료 시 → 실 생산량(`ceil(부족분/수율)`)만큼 재고를 증가시킨 뒤, 그중 부족분만큼을 다시
+     차감하여 주문에 배정하고 `CONFIRMED`로 전환 (증산분 중 잉여는 다음 주문을 위한 재고로 남는다).
+3. **DataMonitor/DummyDataGenerator의 실행 파일 통합** — 두 PoC는 원래 별도 프로세스(별도 `.exe`)로
+   설계되어 있다. 최종 시스템에서도 메인 애플리케이션과는 별도의 실행 파일로 유지하되, 동일한
+   `data/` 폴더를 가리키도록 경로만 맞춘다 (메인 앱 실행 중에도 안전하게 읽기 전용으로 병행 실행 가능).
+
+## 아키텍처
+
+```
+SampleOrderSystem-Chan-0613/
+├── Model/
+│   ├── Sample.h / .cpp
+│   ├── Order.h / .cpp                       # OrderStatus enum
+│   ├── ProductionLine.h / .cpp              # ProductionJob 포함
+│   ├── Dtos.h                               # OrderApprovalResult, InventoryLevel 등
+│   └── Repository/
+│       ├── ISampleRepository.h / IOrderRepository.h / IProductionLineRepository.h
+│       └── JsonSampleRepository / JsonOrderRepository / JsonProductionLineRepository (신규)
+├── Json/                                    # JsonLib (수정 없이 소비)
+├── Controller/
+│   ├── SampleController.h / .cpp
+│   ├── OrderController.h / .cpp             # 예약/승인/거절/출고 + 재고 반영 로직 확장
+│   └── MonitoringController.h / .cpp
+├── View/
+│   ├── MainMenuView.h / .cpp                # 요약 정보(등록 시료 수/총 재고/전체 주문/생산 대기) 표시
+│   ├── SampleView / OrderView / MonitoringView / ProductionLineView
+├── data/
+│   ├── samples.json / orders.json / production_queue.json
+├── tools/
+│   ├── DataMonitor/                         # DataMonitor PoC 이식 (읽기 전용 폴링 대시보드)
+│   └── DummyDataGenerator/                  # DummyDataGenerator PoC 이식 (더미 데이터 시딩)
+├── tests/                                   # Model/Repository 단위 테스트
+├── main.cpp                                 # Json Repository 구현체 조립(DI)
+└── docs/
+    ├── PRD.md
+    └── PLAN.md
+```
+
+### 역할 원칙 (ConsoleMVC 계승)
+
+- **Model**: 도메인 데이터와 비즈니스 규칙(재고 계산, 상태 전이, 생산량 계산)만 담당. 콘솔 I/O 직접
+  호출 금지. Repository는 인터페이스 의존 + 구현체 분리.
+- **View**: 콘솔 입출력만 담당. 비즈니스 로직·상태 판단 포함 금지.
+- **Controller**: View 입력을 받아 Repository를 통해 Model을 조작하고 결과를 View에 전달. Model과
+  View는 서로 직접 참조하지 않고 반드시 Controller를 경유한다.
+- **main.cpp**: Repository 구현체(Json*) 조립과 데이터 폴더 경로 결정만 담당하는 유일한 지점.
+- 순환 의존 금지: `Model → View/Controller` 방향의 include는 금지.
+
+## 기술 스택
+
+- 언어: C++20 (`stdcpp20`)
+- 빌드: Visual Studio (MSBuild, vcxproj), PlatformToolset v145 (로컬에 없으면
+  `/p:PlatformToolset=v143`으로 오버라이드 가능 — 앞선 PoC들에서 확인됨)
+- 대상: Windows Console Application (Win32 / x64, Debug / Release)
+- 외부 의존성 없음 — JSON 처리는 자체 구현 `JsonLib`만 사용, 난수는 표준 라이브러리 `<random>`만 사용
+- 소스 파일은 BOM 없는 UTF-8이므로, 한글 리터럴이 포함된 모든 `ClCompile` 항목에 `/utf-8`을 지정한다.
+  콘솔 코드페이지도 `SetConsoleOutputCP(CP_UTF8)`/`SetConsoleCP(CP_UTF8)`로 맞춘다.
+
+## 커밋/문서 관리
+
+- Agentic Engineering 평가 기준(문서 관리, Harness, Test, CleanCode, Commit 이력)을 고려하여 작업
+  단위로 의미 있는 커밋을 남긴다.
+- 이 파일(CLAUDE.md)은 스코프가 바뀌거나 구조가 변경될 때 함께 갱신한다.
+- `docs/PRD.md`에 기능 명세를 기준으로 한 요구사항 정의를, `docs/PLAN.md`에 단계별 구현 계획을 둔다.
+- 이식한 코드(Model, Repository, JsonLib)를 수정할 경우, 통합 지점이 깨질 수 있으므로 변경 사유를
+  커밋 메시지에 명시하고 필요 시 원본 PoC 저장소 쪽 CLAUDE.md에도 반영한다.
