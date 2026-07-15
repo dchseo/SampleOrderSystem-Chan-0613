@@ -68,6 +68,12 @@ TEST(Unit, ClassifyInventoryLevel_LowWhenStockPositiveButBelowReference)
     ASSERT_TRUE(ClassifyInventoryLevel(30, 200) == InventoryLevel::Low);
 }
 
+TEST(Unit, ClassifyInventoryLevel_DepletedTakesPriorityOverReference)
+{
+    // PDF 명세: "고갈 : 수량이 0인 상태" — 기준 수량과 무관하게 재고가 0이면 항상 고갈이어야 한다.
+    ASSERT_TRUE(ClassifyInventoryLevel(0, 0) == InventoryLevel::Depleted);
+}
+
 TEST(Unit, ClassifyInventoryLevel_DepletedWhenStockIsZero)
 {
     ASSERT_TRUE(ClassifyInventoryLevel(0, 200) == InventoryLevel::Depleted);
