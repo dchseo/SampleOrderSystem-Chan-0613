@@ -134,80 +134,83 @@
 
 ---
 
-## Phase 2 — Controller 계층 이식 및 재고·생산 라인 로직 완성
+## Phase 2 — Controller 계층 이식 및 재고·생산 라인 로직 완성 ✅ 완료
 
 **목표**: 상태 전이 골격에 실제 재고 반영, 재고 상태 재평가, 생산 라인 실시간 정산 로직을 채워
 기능 명세를 완전히 충족시킨다. 정확한 알고리즘은 [CLAUDE.md](../CLAUDE.md)의
-"재고 및 생산 라인 처리 규칙 (상세)"를 그대로 따른다 (아래는 그 요약).
+"재고 및 생산 라인 처리 규칙 (상세)"를 그대로 따른다.
 
-- [ ] `Controller/SampleController.h/.cpp` — ConsoleMVC에서 그대로 복사
-- [ ] `Controller/MonitoringController.h/.cpp` — ConsoleMVC에서 그대로 복사하되, `GetInventoryStatus`가
-      반환하는 값은 "매 조회 시 재계산"이 아니라 "승인/생산완료 시점에 갱신된 최신 값을 그대로
-      반환"하는 형태로 동작을 재확인 (§2)
-- [ ] **신규**: `Model::ProductionLine::SettleQueue(now)` (또는 동급의 정산 함수) — 실제 경과 시간
-      기준으로 완료된 작업을 FIFO 순서로 순차 처리하는 로직 (§3). **별도 스레드/타이머 없이 지연
-      평가(lazy evaluation)로 구현한다** — 백그라운드에서 계속 시간을 흘려보내며 생산을 진행시키는
-      것이 아니라, 아래 트리거 시점에 호출될 때만 저장된 `StartTime`과 인자로 받은 `now`(현재
-      시각)를 비교해 이미 끝났어야 할 작업을 그 순간에 몰아서 정산한다. 앱이 꺼져 있는 동안에는
-      아무 계산도 일어나지 않는다. 다음을 반복 수행:
-      1. `Current` 없고 대기열 있음 → 맨 앞 작업을 `Current`로 승격, `StartTime = now`
-      2. `Current`의 완료 예정 시각(`StartTime + totalProductionTime`)이 지났음 → 완료 처리(아래
-         재고 반영 로직 호출) 후 다음 작업을 `Current`로 승격, `StartTime = 직전 작업의 완료 예정
-         시각` (지금이 아님 — 오프라인 기간도 실제 시간으로 반영, 요구사항 4·5)
-      3. 안 지났으면 종료 (진행 중)
-      호출할 때마다 `IProductionLineRepository`를 통해 갱신된 큐 상태(`StartTime` 포함)를 즉시
-      다시 저장해, 다음 호출(다음 실행/다음 트리거) 때도 정확히 이어서 계산할 수 있게 한다.
-- [ ] `Controller/OrderController.h/.cpp` — ConsoleMVC의 시그니처를 유지하되 내부 구현을 확장:
-  - `ReserveOrder`: 변경 없음 (`RESERVED` 생성)
-  - `ApproveOrder`: **먼저 `SettleQueue(now)`를 호출**해 그 시점까지 이미 끝났어야 할 생산을 반영한
-    뒤, 그 결과로 갱신된 `Sample.Stock`만 근거로 판단 (다른 생산 중/대기 중 작업의 미래 산출량은
-    고려하지 않음 — 요구사항 6):
-    1. 재고 ≥ 주문 수량 → 재고에서 수량 차감, `CONFIRMED`. 재고 상태 재평가: 재고(차감 전) vs
-       주문 수량 → 여유
-    2. 재고 < 주문 수량 → 재고 전량을 우선 배정(재고 0으로), 부족분 계산 →
-       `ProductionJob{shortageQuantity, actualQuantity = ceil(shortageQuantity/yield), totalProductionTime, startTime}`
-       생성 후 `ProductionLine`(및 `JsonProductionLineRepository`)에 enqueue, `PRODUCING`. 재고
-       상태 재평가: 차감 전 재고가 0이면 고갈, 0<재고<주문수량이면 부족
-  - `RejectOrder`: 변경 없음 (`REJECTED`)
-  - **완료 처리 로직**(더 이상 사용자가 메뉴에서 수동 트리거하지 않음 — `SettleQueue` 내부에서
-    호출되는 헬퍼로 성격 변경, ConsoleMVC의 `CompleteCurrentProduction()` 시그니처는 내부용으로
-    재사용):
-    1. `actualQuantity` 전체를 재고에 더한다 (수율은 재적용하지 않음 — 요구사항 2)
-    2. 그중 해당 주문의 `shortageQuantity`만큼 다시 차감해 배정 → 순증가분(잉여)만 재고에 남음
-    3. 주문 상태 `PRODUCING → CONFIRMED`
-    4. 재고 상태 재평가: (갱신된 재고) − (같은 시료의 다른 `PRODUCING` 주문들의 부족분 합계) 를
-       구해, 방금 완료된 주문의 원래 수량과 비교해 여유/부족/고갈 재분류 (§2)
-  - `ReleaseOrder`: `CONFIRMED → RELEASED` 전환 (재고는 승인 시점에 이미 차감되었으므로 출고 시
-    추가 차감 없음)
-- [ ] 검증: 콘솔 임시 실행으로 "재고 부족 주문 승인 → (실제 시간 경과 대기 또는 짧은
-      `avgProductionTime`으로 테스트) → 생산 라인 조회 시 자동 완료 확인 → 출고"까지 한 사이클을
-      수동으로 실행해 상태 전이가 명세와 일치하는지 확인
+- [x] `Controller/SampleController.h/.cpp` — ConsoleMVC 구조를 계승하되 `RegisterSample`에 검증
+      추가(계획에 없던 확장): 수율이 `(0, 1]` 범위를 벗어나거나 평균 생산시간이 0 이하면 등록을
+      거부한다. 그렇지 않으면 `Model::CalculateActualProductionQuantity`가 나중에 0으로 나누기
+      예외를 던지게 되므로, 경계에서 미리 막는 편이 사용자 경험상 낫다고 판단함
+- [x] `Controller/MonitoringController.h/.cpp` — `GetInventoryStatus`가 각 `Sample`에 캐시된
+      `GetInventoryLevel()`을 그대로 반환하도록 재작성 (ConsoleMVC의 고정 임계값 50 하드코딩
+      방식은 사용하지 않음 — §2 정의와 맞지 않아 폐기)
+- [x] **신규**: `Controller::OrderController::SettleProductionQueue(now)` — 계획에는
+      `Model::ProductionLine`에 두는 것으로 되어 있었으나, 재고/주문 Repository에 접근해야 해서
+      Controller 책임으로 옮김(ProductionLine은 순수 큐 자료구조로 유지). 별도 스레드 없이 지연
+      평가로 구현: `Current` 작업의 완료 예정 시각과 `now`를 비교해 지났으면 완료 처리 후 다음
+      작업을 승격하고, 새 `Current`의 `StartTime`은 "지금"이 아니라 직전 작업의 완료 예정 시각으로
+      설정한다(`ProductionLine::SetCurrentJobStartTime` 신규 추가). 호출마다
+      `IProductionLineRepository::SaveQueue`로 즉시 재저장
+- [x] `Controller/OrderController.h/.cpp` — 생성자가 `IProductionLineRepository&`를 추가로 받도록
+      **시그니처를 확장**(ConsoleMVC 대비 변경 — 생산 큐 영속화에 필요, CLAUDE.md에 명시된 대로
+      "완전 무변경 계승"이 아님을 인지하고 진행):
+  - `ReserveOrder`: 변경 없음. 단, 재시작 후 주문 번호가 기존 데이터와 겹치지 않도록 생성자에서
+    기존 주문의 최대 순번을 스캔해 `nextOrderSequence_`를 이어서 채번하도록 함(계획에 없던 수정 —
+    영속화된 Repository를 그대로 재사용하는 이 구조에서는 실제로 필요한 보정이었음)
+  - `ApproveOrder`: 먼저 `SettleProductionQueue(now)` 호출 → 차감 전 재고 vs 주문 수량으로 여유/
+    부족/고갈 재평가 → 재고 충분이면 즉시 차감 후 `CONFIRMED`, 부족이면 가용 재고 전량 배정(재고
+    0) 후 `Model::CalculateShortage`/`CalculateActualProductionQuantity`/
+    `CalculateTotalProductionTime`(Phase 1의 `InventoryCalculator` 그대로 재사용)으로 `ProductionJob`
+    생성, `PRODUCING`
+  - `RejectOrder`: 변경 없음
+  - 완료 처리(`ApplyProductionCompletion`, 비공개 헬퍼로 전환): `actualQuantity` 전체를 재고에
+    더한 뒤 **`shortageQuantity`만큼만** 다시 차감해 배정(ConsoleMVC 원본은 `order.GetQuantity()`
+    전체를 차감했는데, 이러면 잉여 재고가 전혀 남지 않아 CLAUDE.md 예시와 어긋남 — 원본을 그대로
+    베끼지 않고 CLAUDE.md 규칙대로 고쳐 구현함). 이후 같은 시료의 다른 `PRODUCING` 주문 부족분
+    합계를 뺀 순가용재고로 재고 상태 재분류
+  - `ReleaseOrder`: 변경 없음
+- [x] 검증: 콘솔 임시 실행 대신, 아래 Unit Test(전체 사이클 자동화 테스트)로 대체
 
-**Unit Test (이 Phase에서 바로 작성)**
-- [ ] Controller 시나리오 테스트: 위 수동 검증("재고 부족 주문 승인 → 생산 완료 → 출고" 사이클)을
-      자동화된 테스트로 승격, 재고 충분/부족 각 분기와 잉여 재고 처리 포함
-- [ ] **CLAUDE.md 요구사항 9 재현 테스트**: 재고 50 → 주문A(100) 승인(부족분 50, 재고 0) →
-      주문B(100) 승인 시 부족분이 100 전체가 되는지 검증
-- [ ] **CLAUDE.md 요구사항 8 재현 테스트**: 동일 시료에 대해 order1(부족분 50, 실생산량 100),
-      order2(부족분 50, 실생산량 100)가 순차로 생산 완료된 후 최종 재고가 정확히 100인지, 그
-      사이 재고 상태가 예시대로 고갈→여유로 전이하는지 검증 (§2)
-- [ ] **실시간 정산(캐치업) 테스트**: `ProductionJob.startTime`을 인위적으로 과거로 설정한 뒤
-      `SettleQueue(now)`를 호출해, 오프라인 기간에 끝났어야 할 작업(대기열에 있던 것 포함, 요구사항
-      5)까지 한 번에 정산되는지, 완료 예정 시각이 아직 안 지난 경우 아무 것도 바뀌지 않는지 검증
+**Unit Test (이 Phase에서 바로 작성) — `tests/unit/OrderControllerScenarioTest.cpp`, 8건**
+- [x] 전체 사이클: 재고 부족 승인 → (StartTime을 과거로 조작해 완료 시각 경과를 흉내) →
+      `SettleProductionQueue` → `CONFIRMED` → `ReleaseOrder` → `RELEASED`, 잉여 재고 확인
+- [x] 재고 충분 시 즉시 `CONFIRMED` 분기
+- [x] **요구사항 9 재현**(2건): 재고 50 → 주문A(100) 승인(부족분 50, 재고 0) → 주문B(100) 승인 시
+      부족분 100 전체. 3건 연속 승인으로 확장한 버전도 추가
+- [x] **요구사항 8 재현**: 동일 시료 order1/order2 순차 완료, 중간 상태(고갈) → 최종 상태(여유),
+      최종 재고 100 확인
+- [x] **실시간 정산(캐치업)**: 매우 긴 오프라인(10시간)을 흉내낸 뒤 한 번의 `SettleProductionQueue`
+      호출로 대기 중이던 2개 작업이 모두 완료되는지 확인
+- [x] 재시작 후 주문 번호 비충돌: 새 `OrderController` 인스턴스를 만들어도 기존 주문과 ID가
+      겹치지 않는지 확인
 
-**적대적 테스트 (이 Phase에서 바로 작성)**
-- [ ] 상태 전이 위반: 이미 `CONFIRMED`/`PRODUCING`/`REJECTED`/`RELEASED`인 주문을 다시 승인·거절
-      시도, `CONFIRMED`가 아닌 주문(`RESERVED`/`PRODUCING`/`REJECTED`)을 출고 시도
-- [ ] 존재하지 않는 참조: 존재하지 않는 `SampleId`로 `ReserveOrder` 호출, 존재하지 않는 `OrderId`로
-      `ApproveOrder`/`RejectOrder`/`ReleaseOrder` 호출
-- [ ] 경계·비정상 입력값: 주문 수량 0 또는 음수, 수율 0(0으로 나누기 방지 확인), 평균 생산시간 0
-- [ ] 동시성·경합: 동일 시료에 대해 재고보다 큰 주문을 연속 승인해 재고 선점 경합을 유발하는
-      시나리오(요구사항 9)가 정상적으로 처리되는지 재확인(Unit Test의 요구사항 9 테스트와 별개로,
-      3건 이상 연속 승인 등 더 공격적인 순서로 반복)
-- [ ] 실시간 정산 경계값: `StartTime`이 미래 시각(시계 역행 등 비정상 상태)이거나, 완료 예정 시각과
-      `now`가 정확히 같은 경계 시각일 때 `SettleQueue`가 예외 없이 일관되게 처리하는지 검증
+**적대적 테스트 (이 Phase에서 바로 작성) — `tests/adversarial/OrderControllerAdversarialTest.cpp`, 16건**
+- [x] 상태 전이 위반(6건): `CONFIRMED`/`PRODUCING`/`REJECTED`인 주문 재승인·재거절 거부,
+      `RESERVED`/`PRODUCING`/`REJECTED`/이미 `RELEASED`인 주문 출고 거부
+- [x] 존재하지 않는 참조(4건): 알 수 없는 `SampleId`로 예약, 알 수 없는 `OrderId`로 승인/거절/출고
+- [x] 경계·비정상 입력값(5건): 주문 수량 0/음수, 수율 0/음수/1 초과, 평균 생산시간 0/음수,
+      중복 `SampleId` 등록 거부
+- [x] 실시간 정산 경계값(2건): `StartTime`이 미래 시각이면 완료되지 않음, 완료 예정 시각과 `now`가
+      정확히 같으면 완료됨(경계 포함 판정 확인)
 
-**참고 저장소**: ConsoleMVC(시그니처/집계 로직), DataMonitor(집계 로직 재사용 사례 참고)
+### 발견 및 수정한 버그 (전/후 별도 커밋)
+
+- **`ClassifyInventoryLevel`이 재고 0을 무조건 고갈로 판정하지 않던 문제**: PDF 명세("고갈 : 수량이
+  0인 상태")를 다시 확인하는 과정에서, `referenceQuantity`가 0 이하인 경계 조건에서 재고 0을 "여유"로
+  잘못 판정할 수 있음을 발견함. 회귀 테스트를 먼저 추가해 실패를 확인한 뒤(`[test]` 커밋), 판정
+  순서를 바꿔 고갈 검사를 최우선으로 수행하도록 수정(`[fix]` 커밋)했다. 실사용 경로(주문 수량은
+  항상 양수)에는 영향이 없었다.
+
+### 빌드 검증
+
+- `MSBuild.exe ... /p:PlatformToolset=v143` 빌드 성공 (경고 없음)
+- `SampleOrderSystem-Chan-0613.exe --test` 실행 → **51/51 테스트 통과**, 종료 코드 0
+
+**참고 저장소**: ConsoleMVC(시그니처/집계 로직 기반, 단 완료 처리 로직과 생성자 시그니처는 의도적으로
+확장/수정함)
 
 ---
 
