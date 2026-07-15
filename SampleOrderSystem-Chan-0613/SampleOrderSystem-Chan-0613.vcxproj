@@ -83,6 +83,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
+      <AdditionalIncludeDirectories>$(ProjectDir)Json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -103,6 +104,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
+      <AdditionalIncludeDirectories>$(ProjectDir)Json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -121,6 +123,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
+      <AdditionalIncludeDirectories>$(ProjectDir)Json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,6 +144,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
+      <AdditionalIncludeDirectories>$(ProjectDir)Json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -155,10 +159,47 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="tests\TestFramework.cpp" />
     <ClCompile Include="tests\unit\FrameworkSelfTest.cpp" />
+    <ClCompile Include="tests\unit\InventoryCalculatorTest.cpp" />
+    <ClCompile Include="tests\unit\JsonRepositoryRoundTripTest.cpp" />
     <ClCompile Include="tests\adversarial\FrameworkSelfTest.cpp" />
+    <ClCompile Include="tests\adversarial\JsonRepositoryFallbackTest.cpp" />
+    <ClCompile Include="Model\Sample.cpp" />
+    <ClCompile Include="Model\Order.cpp" />
+    <ClCompile Include="Model\ProductionLine.cpp" />
+    <ClCompile Include="Model\InventoryCalculator.cpp" />
+    <ClCompile Include="Model\Repository\JsonSampleRepository.cpp" />
+    <ClCompile Include="Model\Repository\JsonOrderRepository.cpp" />
+    <ClCompile Include="Model\Repository\JsonProductionLineRepository.cpp" />
+    <ClCompile Include="Json\src\JsonDocument.cpp" />
+    <ClCompile Include="Json\src\JsonLexer.cpp" />
+    <ClCompile Include="Json\src\JsonParser.cpp" />
+    <ClCompile Include="Json\src\JsonPointer.cpp" />
+    <ClCompile Include="Json\src\JsonUtils.cpp" />
+    <ClCompile Include="Json\src\JsonValue.cpp" />
+    <ClCompile Include="Json\src\JsonWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tests\TestFramework.h" />
+    <ClInclude Include="Model\Sample.h" />
+    <ClInclude Include="Model\Order.h" />
+    <ClInclude Include="Model\Dtos.h" />
+    <ClInclude Include="Model\ProductionLine.h" />
+    <ClInclude Include="Model\InventoryCalculator.h" />
+    <ClInclude Include="Model\Repository\ISampleRepository.h" />
+    <ClInclude Include="Model\Repository\IOrderRepository.h" />
+    <ClInclude Include="Model\Repository\IProductionLineRepository.h" />
+    <ClInclude Include="Model\Repository\JsonSampleRepository.h" />
+    <ClInclude Include="Model\Repository\JsonOrderRepository.h" />
+    <ClInclude Include="Model\Repository\JsonProductionLineRepository.h" />
+    <ClInclude Include="Json\include\json\JsonDocument.h" />
+    <ClInclude Include="Json\include\json\JsonException.h" />
+    <ClInclude Include="Json\include\json\JsonLexer.h" />
+    <ClInclude Include="Json\include\json\JsonParser.h" />
+    <ClInclude Include="Json\include\json\JsonPointer.h" />
+    <ClInclude Include="Json\include\json\JsonType.h" />
+    <ClInclude Include="Json\include\json\JsonUtils.h" />
+    <ClInclude Include="Json\include\json\JsonValue.h" />
+    <ClInclude Include="Json\include\json\JsonWriter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

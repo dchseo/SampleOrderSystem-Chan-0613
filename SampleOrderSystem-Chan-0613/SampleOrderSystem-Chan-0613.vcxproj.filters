@@ -22,6 +22,21 @@
     <Filter Include="tests\adversarial">
       <UniqueIdentifier>{c1c6a4a2-0e1d-4a3a-9f3e-8f9f3b6a2b03}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Model">
+      <UniqueIdentifier>{d2d7b5b3-1f2e-4b4b-a04f-9f0a4c7b3c01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model\Repository">
+      <UniqueIdentifier>{d2d7b5b3-1f2e-4b4b-a04f-9f0a4c7b3c02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Json">
+      <UniqueIdentifier>{d2d7b5b3-1f2e-4b4b-a04f-9f0a4c7b3c03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Json\include">
+      <UniqueIdentifier>{d2d7b5b3-1f2e-4b4b-a04f-9f0a4c7b3c04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Json\src">
+      <UniqueIdentifier>{d2d7b5b3-1f2e-4b4b-a04f-9f0a4c7b3c05}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -33,13 +48,124 @@
     <ClCompile Include="tests\unit\FrameworkSelfTest.cpp">
       <Filter>tests\unit</Filter>
     </ClCompile>
+    <ClCompile Include="tests\unit\InventoryCalculatorTest.cpp">
+      <Filter>tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\unit\JsonRepositoryRoundTripTest.cpp">
+      <Filter>tests\unit</Filter>
+    </ClCompile>
     <ClCompile Include="tests\adversarial\FrameworkSelfTest.cpp">
       <Filter>tests\adversarial</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\adversarial\JsonRepositoryFallbackTest.cpp">
+      <Filter>tests\adversarial</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Sample.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Order.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\ProductionLine.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\InventoryCalculator.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Repository\JsonSampleRepository.cpp">
+      <Filter>Model\Repository</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Repository\JsonOrderRepository.cpp">
+      <Filter>Model\Repository</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Repository\JsonProductionLineRepository.cpp">
+      <Filter>Model\Repository</Filter>
+    </ClCompile>
+    <ClCompile Include="Json\src\JsonDocument.cpp">
+      <Filter>Json\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Json\src\JsonLexer.cpp">
+      <Filter>Json\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Json\src\JsonParser.cpp">
+      <Filter>Json\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Json\src\JsonPointer.cpp">
+      <Filter>Json\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Json\src\JsonUtils.cpp">
+      <Filter>Json\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Json\src\JsonValue.cpp">
+      <Filter>Json\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Json\src\JsonWriter.cpp">
+      <Filter>Json\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tests\TestFramework.h">
       <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Sample.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Order.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Dtos.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\ProductionLine.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\InventoryCalculator.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Repository\ISampleRepository.h">
+      <Filter>Model\Repository</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Repository\IOrderRepository.h">
+      <Filter>Model\Repository</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Repository\IProductionLineRepository.h">
+      <Filter>Model\Repository</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Repository\JsonSampleRepository.h">
+      <Filter>Model\Repository</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Repository\JsonOrderRepository.h">
+      <Filter>Model\Repository</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Repository\JsonProductionLineRepository.h">
+      <Filter>Model\Repository</Filter>
+    </ClInclude>
+    <ClInclude Include="Json\include\json\JsonDocument.h">
+      <Filter>Json\include</Filter>
+    </ClInclude>
+    <ClInclude Include="Json\include\json\JsonException.h">
+      <Filter>Json\include</Filter>
+    </ClInclude>
+    <ClInclude Include="Json\include\json\JsonLexer.h">
+      <Filter>Json\include</Filter>
+    </ClInclude>
+    <ClInclude Include="Json\include\json\JsonParser.h">
+      <Filter>Json\include</Filter>
+    </ClInclude>
+    <ClInclude Include="Json\include\json\JsonPointer.h">
+      <Filter>Json\include</Filter>
+    </ClInclude>
+    <ClInclude Include="Json\include\json\JsonType.h">
+      <Filter>Json\include</Filter>
+    </ClInclude>
+    <ClInclude Include="Json\include\json\JsonUtils.h">
+      <Filter>Json\include</Filter>
+    </ClInclude>
+    <ClInclude Include="Json\include\json\JsonValue.h">
+      <Filter>Json\include</Filter>
+    </ClInclude>
+    <ClInclude Include="Json\include\json\JsonWriter.h">
+      <Filter>Json\include</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
