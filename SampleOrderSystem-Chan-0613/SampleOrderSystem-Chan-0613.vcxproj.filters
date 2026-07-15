@@ -13,5 +13,33 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="tests">
+      <UniqueIdentifier>{c1c6a4a2-0e1d-4a3a-9f3e-8f9f3b6a2b01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests\unit">
+      <UniqueIdentifier>{c1c6a4a2-0e1d-4a3a-9f3e-8f9f3b6a2b02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests\adversarial">
+      <UniqueIdentifier>{c1c6a4a2-0e1d-4a3a-9f3e-8f9f3b6a2b03}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TestFramework.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\unit\FrameworkSelfTest.cpp">
+      <Filter>tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\adversarial\FrameworkSelfTest.cpp">
+      <Filter>tests\adversarial</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tests\TestFramework.h">
+      <Filter>tests</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

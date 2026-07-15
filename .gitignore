@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# SampleOrderSystem-Chan-0613: 런타임에 생성/갱신되는 JSON 데이터 파일 (폴더 구조만 추적, DataPersistence PoC와 동일한 규약)
+SampleOrderSystem-Chan-0613/data/*.json
+!SampleOrderSystem-Chan-0613/data/.gitkeep
