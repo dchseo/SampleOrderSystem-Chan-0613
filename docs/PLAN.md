@@ -375,27 +375,50 @@ Controller 코드)
 
 ---
 
-## Phase 6 — 테스트 회귀 실행 및 커버리지 점검
+## Phase 6 — 테스트 회귀 실행 및 커버리지 점검 ✅ 완료
 
 **목표**: 새 테스트를 여기서 처음 작성하지 않는다. Phase 0~5에서 각 기능을 구현하며 그 자리에서
 바로 작성해 둔 Unit Test/적대적 테스트([CLAUDE.md](../CLAUDE.md) 체크리스트의 "Test" 항목,
 "진행 원칙" 참고)를 모아 **한 번에 회귀 실행**하고, 커버리지 공백이 없는지 최종 점검한다.
 
-- [ ] 전체 테스트 스위트(`tests/unit/`, `tests/adversarial/`)를 한 번에 실행해 Phase 0~5 사이 다른
-      기능 추가로 인한 회귀(regression)가 없는지 확인
-- [ ] **커버리지 점검**: 아래 항목이 어느 Phase에서든 실제로 테스트되었는지 체크리스트로 재확인하고,
-      빠진 것이 있으면 이 단계에서 보완한다.
-      - Model 계산(ceil 공식, 재고 상태 분류) — Phase 1
-      - Repository 왕복 + 손상/누락 파일 폴백 — Phase 1
-      - Controller 시나리오, 요구사항 8·9 재현, 실시간 정산 캐치업 — Phase 2
-      - 상태 전이 위반, 존재하지 않는 참조, 경계 입력값, 재고 선점 경합, 실시간 정산 경계값 — Phase 2
+- [x] 전체 테스트 스위트(`tests/unit/`, `tests/adversarial/`)를 한 번에 실행해 Phase 0~5 사이 다른
+      기능 추가로 인한 회귀(regression)가 없는지 확인 — **56/56 통과, 회귀 없음**
+- [x] **커버리지 점검**: 아래 항목이 어느 Phase에서든 실제로 테스트되었는지 체크리스트로 재확인했다.
+      전 항목이 이미 커버되어 있어 이 단계에서 신규로 보완한 테스트는 없다.
+      - Model 계산(ceil 공식, 재고 상태 분류) — Phase 1,
+        `tests/unit/InventoryCalculatorTest.cpp` (`CalculateActualProductionQuantity_RoundsUpWithCeil`,
+        `ClassifyInventoryLevel_DepletedTakesPriorityOverReference` 등)
+      - Repository 왕복 + 손상/누락 파일 폴백 — Phase 1,
+        `tests/unit/JsonRepositoryRoundTripTest.cpp` + `tests/adversarial/JsonRepositoryFallbackTest.cpp`
+      - Controller 시나리오, 요구사항 8·9 재현, 실시간 정산 캐치업 — Phase 2,
+        `tests/unit/OrderControllerScenarioTest.cpp`
+        (`OrderController_Requirement8_...`, `OrderController_Requirement9_...`,
+        `..._CatchesUpMultipleJobsAfterLongOffline`)
+      - 상태 전이 위반, 존재하지 않는 참조, 경계 입력값, 재고 선점 경합, 실시간 정산 경계값 — Phase 2,
+        `tests/adversarial/OrderControllerAdversarialTest.cpp`
+        (`ApproveOrder_RejectsAlready*`, `*_RejectsUnknown*Id`, `*_RejectsZeroOrNegative*`,
+        `SettleProductionQueue_DoesNothingWhenStartTimeIsInFuture`,
+        `SettleProductionQueue_CompletesWhenNowExactlyEqualsCompletionTime`) — 재고 선점 경합(요구사항 9)은
+        `OrderControllerScenarioTest.cpp`의 Requirement9 테스트 2건으로 커버
       - 서로 다른 시료(수율/평균생산시간 상이) 교차 + 예약·승인 순서 불일치 시 전역 FIFO/시료별
-        재고 격리 — Phase 2 완료 후 보완
-      - 잘못된 메뉴 입력 처리 — Phase 3
-      - 손상/누락된 영속 데이터로 전체 앱 기동 — Phase 4
-      - 보조 도구 동시 실행 시 충돌 없음 — Phase 5
-- [ ] 빌드 스크립트 또는 문서화된 명령으로 "빌드 + 테스트 전체 실행"을 한 번에 수행할 수 있게 정리
-      (Phase 0에서 마련한 하네스를 최종 형태로 굳힘)
+        재고 격리 — Phase 2 완료 후 보완, `tests/unit/OrderControllerMultiSampleTest.cpp`
+      - 잘못된 메뉴 입력 처리 — Phase 3, `tests/adversarial/MainMenuViewAdversarialTest.cpp`
+      - 손상/누락된 영속 데이터로 전체 앱 기동 — Phase 4,
+        `tests/adversarial/ApplicationStartupAdversarialTest.cpp`
+      - 보조 도구 동시 실행 시 충돌 없음 — Phase 5, 자동화 테스트가 아니라 수동 검증으로 확인됨
+        (Phase 5 섹션 "수동 검증 결과" 참고 — `DataMonitor.exe` 백그라운드 폴링 중 메인 앱 출고 처리로
+        RELEASED 2→3건 전환 확인, 크래시 없음)
+- [x] 빌드 스크립트 또는 문서화된 명령으로 "빌드 + 테스트 전체 실행"을 한 번에 수행할 수 있게 정리
+      (Phase 0에서 마련한 하네스를 최종 형태로 굳힘) — 아래 "빌드 검증" 명령을 그대로 사용
+
+### 빌드 검증
+
+- `MSBuild.exe SampleOrderSystem-Chan-0613.slnx /p:Configuration=Debug /p:Platform=x64
+  /p:PlatformToolset=v143` — 메인 앱 + `tools/DataMonitor` + `tools/DummyDataGenerator` 3개
+  프로젝트 모두 경고 없이 빌드 성공
+- `x64/Debug/SampleOrderSystem-Chan-0613.exe --test` 실행 → **56/56 테스트 통과**, 종료 코드 0
+  (Phase 0~5에서 누적 작성된 Unit Test 20건 + 적대적 테스트 36건 전부 포함, 이 Phase에서 신규
+  작성한 테스트는 없음 — 커버리지 공백이 없었기 때문)
 
 **참고 저장소**: 없음 (신규, 단 각 Phase에서 이미 작성된 테스트를 모아 회귀 실행)
 
