@@ -428,12 +428,24 @@ Controller 코드)
 
 **목표**: 제출 전 품질 기준을 재점검한다.
 
-- [ ] 계층 간 책임 분리 재점검 (Model에 콘솔 I/O 없는지, View에 로직 없는지, Controller가 Model/View를
-      올바르게 중개하는지)
-- [ ] `README.md` 작성 — 빌드 방법, 실행 방법(메인 앱 + 보조 도구 2종), 폴더 구조 요약
-- [ ] `docs/PRD.md`, `CLAUDE.md` 최신화 (Phase 진행 중 변경된 설계 결정 반영)
-- [ ] 커밋 이력 리뷰 — 단계별로 의미 있는 커밋이 남아 있는지 확인, 누락 시 정리
-- [ ] Repository를 Public으로 설정 확인
+- [x] 계층 간 책임 분리 재점검 (Model에 콘솔 I/O 없는지, View에 로직 없는지, Controller가 Model/View를
+      올바르게 중개하는지) + **OOP/SOLID 관점 트레이드오프 검토**. 전체 검토 결과와 각 결정의
+      근거는 [docs/CLEAN_CODE_REVIEW.md](CLEAN_CODE_REVIEW.md)에 정리했다. 요약:
+      - View → 로직 유출 없음, Model → 콘솔 I/O 유출은 Repository의 진단용 `std::cerr` 로깅뿐
+        (계승 계약 + 일관성 근거로 유지 결정)
+      - **실제로 반영한 리팩토링**: `OrderController`의 `ApproveOrder`/`RejectOrder`/`ReleaseOrder`가
+        중복 작성하던 "조회 + 상태 검증" 블록을 `FindOrderRequiringStatus` 헬퍼로 추출
+        (behavior-preserving, 56/56 회귀 통과 확인, 커밋 `4a7ad34`)
+      - **검토 후 유지하기로 결정한 트레이드오프 4건**: OrderController의 SRP 긴장(주문 생명주기
+        + 생산 정산이 원자적으로 얽혀 있어 분리 시 결합만 늘어남), Repository 인터페이스의 ISP
+        (계승 계약 + 실질적 구현 고통 없음), Order::SetStatus 원시 setter(전이 규칙은 이미
+        Controller/테스트로 검증됨), main.cpp 메뉴 switch 3중 반복(OCP, 메뉴 6개 고정이라 추상화
+        실익 낮음) — 각각의 상세 근거는 CLEAN_CODE_REVIEW.md 참고
+- [x] `README.md` 작성 — 빌드 방법, 실행 방법(메인 앱 + 보조 도구 2종), 폴더 구조 요약
+- [x] `docs/PRD.md`, `CLAUDE.md` 최신화 (Phase 진행 중 변경된 설계 결정 반영)
+- [x] 커밋 이력 리뷰 — [docs/COMMIT_HISTORY.md](COMMIT_HISTORY.md)에 전체 커밋을 표로 정리
+      (커밋 해시/제목/반영 내용). 단계별로 의미 있는 커밋이 남아 있는지 확인, 누락 없음
+- [x] Repository를 Public으로 설정 확인
 
 ---
 
