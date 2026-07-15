@@ -162,6 +162,7 @@
     <ClCompile Include="tests\unit\InventoryCalculatorTest.cpp" />
     <ClCompile Include="tests\unit\JsonRepositoryRoundTripTest.cpp" />
     <ClCompile Include="tests\unit\OrderControllerScenarioTest.cpp" />
+    <ClCompile Include="tests\unit\OrderControllerMultiSampleTest.cpp" />
     <ClCompile Include="tests\adversarial\FrameworkSelfTest.cpp" />
     <ClCompile Include="tests\adversarial\JsonRepositoryFallbackTest.cpp" />
     <ClCompile Include="tests\adversarial\OrderControllerAdversarialTest.cpp" />

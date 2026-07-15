@@ -63,6 +63,9 @@
     <ClCompile Include="tests\unit\OrderControllerScenarioTest.cpp">
       <Filter>tests\unit</Filter>
     </ClCompile>
+    <ClCompile Include="tests\unit\OrderControllerMultiSampleTest.cpp">
+      <Filter>tests\unit</Filter>
+    </ClCompile>
     <ClCompile Include="tests\adversarial\FrameworkSelfTest.cpp">
       <Filter>tests\adversarial</Filter>
     </ClCompile>
